@@ -6,7 +6,7 @@
 
 <img alt="Screenshot of MicroSpec output" src="screenshot.png" height=250 />
 
-## 8 Lines of Code
+## 8 Lines of Code (1.06 KB)
 
 Just put this at the bottom of any test file:
 
