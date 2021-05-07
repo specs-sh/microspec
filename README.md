@@ -18,7 +18,7 @@ test.shouldFail() {
 }
 
 # Copy/paste the 8 lines of code below:
-for testFn in $( declare -pF | awk '{ print $3 }' | grep ^test | sort -R ); do
+for testFn in $( declare -pF | awk '{ print $3 }' | grep ^test\|^spec | sort -R ); do
   if output="$( set -eE; $testFn 2>&1 )"; then
     echo -e "[\e[32mPASS\e[0m] $testFn"; [ "$VERBOSE" = true ] && printf '%s\n%s\n' Output: "$output"
   else
@@ -51,3 +51,13 @@ source runTests.sh
 Here is the output of running the `example.spec.sh` file here in GitHub:
 
 ![Screenshot of MicroSpec output](screenshot.png)
+
+# Usage
+
+- If a test _fails_, the output will be printed (_combined STDOUT/STDERR_)
+- If a test _passes_, the output will not be printed (_combined STDOUT/STDERR_)
+  - If you set the `VERBOSE=true` variable, passing tests will _also_ print output
+- The tests `exit 1` if any tests failed (_after running all of the tests_)
+- The tests are _run in random order_ which is a good testing convention
+
+### Enjoy.
