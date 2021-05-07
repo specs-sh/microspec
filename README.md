@@ -18,14 +18,14 @@ test.shouldFail() {
 }
 
 # Copy/paste the 8 lines of code below:
-for testFn in $( declare -pF | awk '{ print $3 }' | grep ^test\|^spec | sort -R ); do
-  if output="$( set -eE; $testFn 2>&1 )"; then
-    echo -e "[\e[32mPASS\e[0m] $testFn"; [ "$VERBOSE" = true ] && printf '%s\n%s\n' Output: "$output"
-  else
-    echo -e "[\e[31mFAIL\e[0m] $testFn"; anyFailed=$(( anyFailed = anyFailed + 1 )); printf '%s\n%s\n' Output: "$output"
-  fi
+for testFn in $( declare -pF | awk '{ print $3 }' | grep ^test | sort -R ); do
+  output="$( [ -z "${BEFORE_TEST+x}" ] && set -eE || eval "$BEFORE_TEST"; $testFn 2>&1 )"
+  case $? in
+    0) echo -e "[\e[32mPASS\e[0m] $testFn"; [ "$VERBOSE" = true ] && printf '%s\n%s\n' Output: "$output" ;;
+    *) echo -e "[\e[31mFAIL\e[0m] $testFn"; anyFailed=$(( anyFailed = anyFailed + 1 )); printf '%s\n%s\n' Output: "$output" ;;
+  esac
 done
-[ -n "$anyFailed" ] && { echo "$anyFailed test(s) failed" >&2; exit 1; }
+[ -n "$anyFailed" ] && { echo "$anyFailed test(s) failed" >&2; exit 1; 
 ```
 
 ### Have multiple test files?
@@ -55,9 +55,14 @@ Here is the output of running the `example.spec.sh` file here in GitHub:
 # Usage
 
 - Any function which starts with `test` or `spec` is considered a test
-- If a test _fails_, the output will be printed (_combined STDOUT/STDERR_)
-- If a test _passes_, the output will not be printed (_combined STDOUT/STDERR_)
+- If a test _fails_, the _output_ will be printed (_combined STDOUT/STDERR_)
+- If a test _passes_, the _output_ will not be printed (_combined STDOUT/STDERR_)
   - If you set the `VERBOSE=true` variable, passing tests will _also_ print output
+- A test is considered _failed_ if any statement in the function "fails" (_returns non-zero_)
+- You can set `BEFORE_TEST="command; command"` and it will be run before each test
+  > By default, this is configured to `set -eE` which is what causes tests to fail  
+  > if any command fails. You can disable this behavior via: `BEFORE_TEST=""`
+  > To keep this behavior but use `BEFORE_TEST`, set `BEFORE_TEST="set -eE; command"`
 - The tests `exit 1` if any tests failed (_after running all of the tests_)
 - The tests are _run in random order_ which is a good testing convention
 
