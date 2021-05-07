@@ -5,4 +5,4 @@ for testFn in $( declare -pF | awk '{ print $3 }' | grep ^test | sort -R ); do
     *) echo -e "[\e[31mFAIL\e[0m] $testFn"; anyFailed=$(( anyFailed = anyFailed + 1 )); printf '%s\n%s\n' Output: "$output" ;;
   esac
 done
-[ -n "$anyFailed" ] && { echo "$anyFailed test(s) failed" >&2; exit 1; 
+[ -n "$anyFailed" ] && { echo "$anyFailed test(s) failed" >&2; exit 1; }
