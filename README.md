@@ -54,6 +54,7 @@ Here is the output of running the `example.spec.sh` file here in GitHub:
 
 # Usage
 
+- Any function which starts with `test` or `spec` is considered a test
 - If a test _fails_, the output will be printed (_combined STDOUT/STDERR_)
 - If a test _passes_, the output will not be printed (_combined STDOUT/STDERR_)
   - If you set the `VERBOSE=true` variable, passing tests will _also_ print output
