@@ -25,7 +25,7 @@ for testFn in $( declare -pF | awk '{ print $3 }' | grep ^test | sort -R ); do
     *) echo -e "[\e[31mFAIL\e[0m] $testFn"; anyFailed=$(( anyFailed = anyFailed + 1 )); printf '%s\n%s\n' Output: "$output" ;;
   esac
 done
-[ -n "$anyFailed" ] && { echo "$anyFailed test(s) failed" >&2; exit 1; 
+[ -n "$anyFailed" ] && { echo "$anyFailed test(s) failed" >&2; exit 1; }
 ```
 
 ### Have multiple test files?
@@ -63,6 +63,7 @@ Here is the output of running the `example.spec.sh` file here in GitHub:
   > By default, this is configured to `set -eE` which is what causes tests to fail  
   > if any command fails. You can disable this behavior via: `BEFORE_TEST=""`
   > To keep this behavior but use `BEFORE_TEST`, set `BEFORE_TEST="set -eE; command"`
+- _Note: if you use `set -e` in your test file, the tests will exit immediately without printing all results._
 - The tests `exit 1` if any tests failed (_after running all of the tests_)
 - The tests are _run in random order_ which is a good testing convention
 
