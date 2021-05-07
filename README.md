@@ -4,6 +4,8 @@
 
 ---
 
+<img alt="Screenshot of MicroSpec output" src="screenshot.png" height=150 />
+
 ## 8 Lines of Code
 
 Just put this at the bottom of any test file:
@@ -47,10 +49,6 @@ source runTests.sh
 > You can copy/paste the `runTests.sh` file here in GitHub is you would like.
 
 ### That's it.
-
-Here is the output of running the `example.spec.sh` file here in GitHub:
-
-![Screenshot of MicroSpec output](screenshot.png)
 
 # Usage
 
