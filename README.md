@@ -60,9 +60,9 @@ Here is the output of running the `example.spec.sh` file here in GitHub:
   - If you set the `VERBOSE=true` variable, passing tests will _also_ print output
 - A test is considered _failed_ if any statement in the function "fails" (_returns non-zero_)
 - You can set `BEFORE_TEST="command; command"` and it will be run before each test
-  > By default, this is configured to `set -eE` which is what causes tests to fail  
-  > if any command fails. You can disable this behavior via: `BEFORE_TEST=""`
-  > To keep this behavior but use `BEFORE_TEST`, set `BEFORE_TEST="set -eE; command"`
+  > By default, this is configured to `set -eE` which is what causes tests to fail if any command fails.  
+  > You can disable this behavior by setting `BEFORE_TEST=""` to an empty string (`set -eE` will not run).  
+  > To keep `set -eE` behavior but use `BEFORE_TEST`, set `BEFORE_TEST="set -eE; custom command;"`
 - _Note: if you use `set -e` in your test file, the tests will exit immediately without printing all results._
 - The tests `exit 1` if any tests failed (_after running all of the tests_)
 - The tests are _run in random order_ which is a good testing convention
