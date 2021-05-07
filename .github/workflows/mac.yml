@@ -1,0 +1,17 @@
+name: Mac (BASH 3.2)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: "bash --version | head -1"
+        shell: bash
+      - run: "./test/MicroSpec.spec.sh"
+        shell: bash
