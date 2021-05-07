@@ -21,7 +21,7 @@ test.shouldFail() {
 
 # Copy/paste the 8 lines of code below:
 testTrap='echo "Stacktrace:"; for ((i=0;i<${#BASH_SOURCE[@]};i++)); do echo "${BASH_SOURCE[i]}:${LINENO[i]} ${FUNCNAME[i]}()\n$( sed "${LINENO[i]}q;d" "${BASH_SOURCE[i]}" | sed "s/^ *//g" | sed "s/^/    /" )"; done'
-for testFn in $( declare -pF | awk '{ print $3 }' | grep ^test | sort -R ); do
+for testFn in $( declare -pF | awk '{ print $3 }' | grep ^test\|^spec | sort -R ); do
   output="$( trap "$testTrap" ERR; [ -z "${BEFORE_TEST+x}" ] && set -eE || eval "$BEFORE_TEST"; $testFn 2>&1 )"
   case $? in
     0) echo -e "[\e[32mPASS\e[0m] $testFn"; [ "$VERBOSE" = true ] && printf '  %s\n%s\n' Output: "$( echo -e "$output" | sed 's/^/    /' )" ;;
