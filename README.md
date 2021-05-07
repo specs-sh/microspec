@@ -21,7 +21,7 @@ test.shouldFail() {
 
 # Copy/paste the 8 lines of code below:
 testTrap='[ -n "${FUNCNAME[*]}" ] && echo -e "\e[31;1mStacktrace:\e[0m"; for ((i=0;i<${#BASH_SOURCE[@]};i++)); do [ -z "${FUNCNAME[i]}" ] || [ -z "${LINENO[i]}" ] && continue; echo -e "\e[34m${BASH_SOURCE[i]}:${LINENO[i]}\e[0m \e[36m${FUNCNAME[i]}()\e[0m\n\e[93m$( sed "${LINENO[i]}q;d" "${BASH_SOURCE[i]}" | sed "s/^ *//g" | sed "s/^/    /" )\e[0m"; done'
-for testFn in $( declare -pF | awk '{ print $3 }' | grep "^test\|^spec" | sort -R ); do
+for testFn in $( declare -pF | awk '{ print $3 }' | grep "^test\|^spec" ); do
   output="$( trap "$testTrap" ERR; [ -z "${BEFORE_TEST+x}" ] && set -eE || eval "$BEFORE_TEST"; $testFn 2>&1 )"
   case $? in
     0) echo -e "[\e[32mPASS\e[0m] $testFn"; [ "${VERBOSE:-}" = true ] && [ -n "$output" ] && printf '  \e[39;1m%s\e[0m\n%s\n' Output: "$( echo -e "$output" | sed 's/^/    /' )" ;;

@@ -1,5 +1,22 @@
 #! /usr/bin/env bash
 
+# myDebug() {
+#   foo=$?
+#   echo "MY DEBUG called with $# arguments: $* -- return value: $foo - $BASH_COMMAND"
+# }
+
+# trap myDebug DEBUG
+
+# # trap 'echo BOOM' ERR
+
+# # set -e
+
+# ls /foobar
+
+# (( 1 == 0 ))
+
+
+
 test.shouldPass() {
   echo "STDOUT from shouldPass"
   echo "STDERR from shouldPass" >&2
@@ -7,21 +24,14 @@ test.shouldPass() {
 }
 
 test.shouldFail() {
-  echo "STDOUT from shouldFail"
-  echo "STDERR from shouldFail" >&2
+  echo "STDOUT from shouldFail?"
+  echo "STDERR from shouldFail?" >&2
   (( 1 == 0 )) # <-- this fails so the test fails
   (( 1 == 1 )) # <-- even though the final result passes
 }
 
-# Copy/paste the 8 lines of code below:
-testTrap='[ -n "${FUNCNAME[*]}" ] && echo -e "\e[31;1mStacktrace:\e[0m"; for ((i=0;i<${#BASH_SOURCE[@]};i++)); do [ -z "${FUNCNAME[i]}" ] || [ -z "${LINENO[i]}" ] && continue; echo -e "\e[34m${BASH_SOURCE[i]}:${LINENO[i]}\e[0m \e[36m${FUNCNAME[i]}()\e[0m\n\e[93m$( sed "${LINENO[i]}q;d" "${BASH_SOURCE[i]}" | sed "s/^ *//g" | sed "s/^/    /" )\e[0m"; done'
-for testFn in $( declare -pF | awk '{ print $3 }' | grep "^test\|^spec" | sort -R ); do
-  output="$( trap "$testTrap" ERR; [ -z "${BEFORE_TEST+x}" ] && set -eE || eval "$BEFORE_TEST"; $testFn 2>&1 )"
-  case $? in
-    0) echo -e "[\e[32mPASS\e[0m] $testFn"; [ "${VERBOSE:-}" = true ] && [ -n "$output" ] && printf '  \e[39;1m%s\e[0m\n%s\n' Output: "$( echo -e "$output" | sed 's/^/    /' )" ;;
-    *) echo -e "[\e[31mFAIL\e[0m] $testFn"; anyFailed=$(( anyFailed = anyFailed + 1 )); [ -n "$output" ] && printf '  \e[39;1m%s\e[0m\n%s\n' Output: "$( echo -e "$output" | sed 's/^/    /' )" ;;
-  esac
-done; [ -n "${anyFailed:-}" ] && { echo -e "\e[31;1m$anyFailed test(s) failed\e[0m" >&2; exit 1; } || echo -e "\e[32;1mTests passed\e[0m"
+# # Copy/paste the 8 lines of code below:
+# # TODO
 
 # Alternatively, simply source runTests.sh
-# source runTests.sh
+source runTests.sh

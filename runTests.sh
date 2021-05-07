@@ -1,8 +1,27 @@
-testTrap='[ -n "${FUNCNAME[*]}" ] && echo -e "\e[31;1mStacktrace:\e[0m"; for ((i=0;i<${#BASH_SOURCE[@]};i++)); do [ -z "${FUNCNAME[i]}" ] || [ -z "${LINENO[i]}" ] && continue; echo -e "\e[34m${BASH_SOURCE[i]}:${LINENO[i]}\e[0m \e[36m${FUNCNAME[i]}()\e[0m\n\e[93m$( sed "${LINENO[i]}q;d" "${BASH_SOURCE[i]}" | sed "s/^ *//g" | sed "s/^/    /" )\e[0m"; done'
-for testFn in $( declare -pF | awk '{ print $3 }' | grep "^test\|^spec" | sort -R ); do
-  output="$( trap "$testTrap" ERR; [ -z "${BEFORE_TEST+x}" ] && set -eE || eval "$BEFORE_TEST"; $testFn 2>&1 )"
-  case $? in
-    0) echo -e "[\e[32mPASS\e[0m] $testFn"; [ "${VERBOSE:-}" = true ] && [ -n "$output" ] && printf '  \e[39;1m%s\e[0m\n%s\n' Output: "$( echo -e "$output" | sed 's/^/    /' )" ;;
-    *) echo -e "[\e[31mFAIL\e[0m] $testFn"; anyFailed=$(( anyFailed = anyFailed + 1 )); [ -n "$output" ] && printf '  \e[39;1m%s\e[0m\n%s\n' Output: "$( echo -e "$output" | sed 's/^/    /' )" ;;
-  esac
-done; [ -n "${anyFailed:-}" ] && { echo -e "\e[31;1m$anyFailed test(s) failed\e[0m" >&2; exit 1; } || echo -e "\e[32;1mTests passed\e[0m"
+runTests() {
+  local __microSpec__testFunction __microSpec__testFunctionOutput __microSpec__testFunctionExitCode __microSpec__testFunctionHead __microSpec__testFunctionBody __microSpec__newTestFunction __microSpec__newline=$'\n'
+  if [ -z "$MICROSPEC_TEST_FUNCTION" ]; then
+    local -a __microSpec__testFunctions=($( declare -pF | awk '{ print $3 }' | grep "^test\|^spec" ))
+    for __microSpec__testFunction in "${__microSpec__testFunctions[@]}"; do
+      __microSpec__testFunctionOutput="$( MICROSPEC_TEST_FUNCTION="$__microSpec__testFunction" "$0" 2>&1 )"
+      __microSpec__testFunctionExitCode=$?
+      if (( $__microSpec__testFunctionExitCode == 0 )); then
+        echo "PASS: $__microSpec__testFunction"
+      else
+        echo "FAIL: $__microSpec__testFunction"
+      fi
+      # echo "[OUTPUT] => [$__microSpec__testFunctionOutput]"
+    done
+  else
+    if (( ${BASH_VERSINFO[0]} < 4 )) || [ "${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}" = 4.0 ]; then
+      __microSpec__testFunctionHead="$( declare -f "$MICROSPEC_TEST_FUNCTION" | head -2 )"
+      __microSpec__testFunctionBody="$( declare -f "$MICROSPEC_TEST_FUNCTION" | tail -n +3 )"
+      __microSpec__newTestFunction="$__microSpec__testFunctionHead${__microSpec__newline}trap '(( \$? == 0 )) || exit \$?' DEBUG${__microSpec__newline}$__microSpec__testFunctionBody"
+      eval "$__microSpec__newTestFunction"
+    fi
+    set -eE
+    "$MICROSPEC_TEST_FUNCTION"
+  fi
+}
+
+runTests
