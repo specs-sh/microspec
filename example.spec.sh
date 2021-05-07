@@ -13,6 +13,7 @@ test.shouldFail() {
   (( 1 == 1 )) # <-- even though the final result passes
 }
 
+# Copy/paste the 8 lines of code below:
 for testFn in $( declare -pF | awk '{ print $3 }' | grep ^test | sort -R ); do
   output="$( [ -z "${BEFORE_TEST+x}" ] && set -eE || eval "$BEFORE_TEST"; $testFn 2>&1 )"
   case $? in
