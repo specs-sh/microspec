@@ -4,7 +4,7 @@
 
 ---
 
-<img alt="Screenshot of MicroSpec output" src="screenshot.png" height=150 />
+<img alt="Screenshot of MicroSpec output" src="screenshot.png" height=250 />
 
 ## 8 Lines of Code
 
@@ -20,14 +20,14 @@ test.shouldFail() {
 }
 
 # Copy/paste the 8 lines of code below:
+testTrap='echo "Stacktrace:"; for ((i=0;i<${#BASH_SOURCE[@]};i++)); do echo "${BASH_SOURCE[i]}:${LINENO[i]} ${FUNCNAME[i]}()\n$( sed "${LINENO[i]}q;d" "${BASH_SOURCE[i]}" | sed "s/^ *//g" | sed "s/^/    /" )"; done'
 for testFn in $( declare -pF | awk '{ print $3 }' | grep ^test | sort -R ); do
-  output="$( [ -z "${BEFORE_TEST+x}" ] && set -eE || eval "$BEFORE_TEST"; $testFn 2>&1 )"
+  output="$( trap "$testTrap" ERR; [ -z "${BEFORE_TEST+x}" ] && set -eE || eval "$BEFORE_TEST"; $testFn 2>&1 )"
   case $? in
-    0) echo -e "[\e[32mPASS\e[0m] $testFn"; [ "$VERBOSE" = true ] && printf '%s\n%s\n' Output: "$output" ;;
-    *) echo -e "[\e[31mFAIL\e[0m] $testFn"; anyFailed=$(( anyFailed = anyFailed + 1 )); printf '%s\n%s\n' Output: "$output" ;;
+    0) echo -e "[\e[32mPASS\e[0m] $testFn"; [ "$VERBOSE" = true ] && printf '  %s\n%s\n' Output: "$( echo -e "$output" | sed 's/^/    /' )" ;;
+    *) echo -e "[\e[31mFAIL\e[0m] $testFn"; anyFailed=$(( anyFailed = anyFailed + 1 )); printf '  %s\n%s\n' Output: "$( echo -e "$output" | sed 's/^/    /' )" ;;
   esac
-done
-[ -n "$anyFailed" ] && { echo "$anyFailed test(s) failed" >&2; exit 1; }
+done; [ -n "$anyFailed" ] && { echo "$anyFailed test(s) failed" >&2; exit 1; }
 ```
 
 ### Have multiple test files?
@@ -54,6 +54,7 @@ source runTests.sh
 
 - Any function which starts with `test` or `spec` is considered a test
 - If a test _fails_, the _output_ will be printed (_combined STDOUT/STDERR_)
+  > Failing tests also print out a stacktrace including the failing line (_and a preview of its code_)
 - If a test _passes_, the _output_ will not be printed (_combined STDOUT/STDERR_)
   - If you set the `VERBOSE=true` variable, passing tests will _also_ print output
 - A test is considered _failed_ if any statement in the function "fails" (_returns non-zero_)
