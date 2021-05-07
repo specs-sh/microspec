@@ -1,4 +1,4 @@
-# 🧫 microspec
+# 🧫 MicroSpec
 
 > BASH Testing Framework _so tiny you can copy/paste it into your test files!_
 
@@ -47,3 +47,7 @@ source runTests.sh
 > You can copy/paste the `runTests.sh` file here in GitHub is you would like.
 
 ### That's it.
+
+Here is the output of running the `example.spec.sh` file here in GitHub:
+
+![Screenshot of MicroSpec output](screenshot.png)
