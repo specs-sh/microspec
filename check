@@ -8,11 +8,17 @@ check() {
       displayTestResult)
         shift; local __check__line
         while IFS= read -r __check__line; do
-          if [[ "$__check__line" = *"declare -- CHECK_FAILED_STACKTRACE="* ]] && [[ "$__check__line" = *"declare -- CHECK_STDOUT"* ]]; then
+          if [[ "$__check__line" = *"declare -- CHECK_STDOUT"* ]]; then
             local __check__stdoutAndFailedCommandInfo="$( eval printf '%s\\n' "$__check__line" )"
             eval "$__check__stdoutAndFailedCommandInfo"
-            eval "declare -a CHECK_FAILED_STACKTRACE=${CHECK_STDOUT##*declare -a CHECK_FAILED_STACKTRACE=}"
-            CHECK_STDOUT="${CHECK_STDOUT%%declare -- CHECK_FAILED_STACKTRACE=*}"; CHECK_STDOUT="${CHECK_STDOUT%$'\n'}"
+            if [[ "$CHECK_STDOUT" = "declare -- CHECK_FAILED_STACKTRACE="* ]]; then
+              eval "$CHECK_STDOUT"
+              CHECK_STDOUT=""
+            elif [[ "$CHECK_STDOUT" = *"declare -- CHECK_FAILED_STACKTRACE="* ]]; then
+              declare -p CHECK_STDOUT >> log.log 
+              eval "declare -- CHECK_FAILED_STACKTRACE=${CHECK_STDOUT##*declare -a CHECK_FAILED_STACKTRACE=}"
+              CHECK_STDOUT="${CHECK_STDOUT%%declare -- CHECK_FAILED_STACKTRACE=*}"; CHECK_STDOUT="${CHECK_STDOUT%$'\n'}"
+            fi
           elif [[ "$__check__line" =~ ^declare ]]; then
             eval "$( eval printf '%s\\n' "$__check__line" )"
           fi
@@ -21,23 +27,23 @@ check() {
           0) echo -e "[\e[${CHECK_COLOR_PASS:-32}mPASS\e[0m] $CHECK_TEST"; (( CHECK_PASSED = CHECK_PASSED + 1 )) ;;
           *) echo -e "[\e[${CHECK_COLOR_FAIL:-31}mFAIL\e[0m] $CHECK_TEST"; (( CHECK_FAILED = CHECK_FAILED + 1 )) ;;
         esac
-        if [ -n "$CHECK_STDOUT" ] && { (( $CHECK_EXITCODE != 0 )) ||  [ "$VERBOSE" = true ]; }; then
+        if [ -n "$CHECK_STDOUT" ] && { (( $CHECK_EXITCODE != 0 )) || [ "$VERBOSE" = true ]; }; then
           echo -e "\n  [\e[${CHECK_COLOR_NEUTRAL:-34}mStandard Output\e[0m]"
           printf '  %s\n' "$( echo "$CHECK_STDOUT" | sed 's/^/  /' )"
           [ -z "$CHECK_STDERR" ] && echo
         fi
-        if [ -n "$CHECK_STDERR" ] && { (( $CHECK_EXITCODE != 0 )) ||  [ "$VERBOSE" = true ]; }; then
+        if [ -n "$CHECK_STDERR" ] && { (( $CHECK_EXITCODE != 0 )) || [ "$VERBOSE" = true ]; }; then
           echo -e "\n  [\e[${CHECK_COLOR_FAIL:-31}mStandard Error\e[0m]"
           printf '  %s\n' "$( echo "$CHECK_STDERR" | sed 's/^/  /' )"
           [ -z "$CHECK_FAILED_STACKTRACE" ] && (( ${#CHECK_FAILED_COMMAND_INFO} == 0 )) && echo
         fi
-        if [ -n "$CHECK_FAILED_STACKTRACE" ] && { (( $CHECK_EXITCODE != 0 )) ||  [ "$VERBOSE" = true ]; }; then
+        if [ -n "$CHECK_FAILED_STACKTRACE" ] && { (( $CHECK_EXITCODE != 0 )) || [ "$VERBOSE" = true ]; }; then
           echo -e "\n  [\e[${CHECK_COLOR_STACKTRACE:-33}mStacktrace\e[0m]"
           echo -e "$( echo "$CHECK_FAILED_STACKTRACE" | sed 's/^/  /' )"
         fi
         return 0 ;;
       getTestNames)
-        shift; CHECK_FILE="$1"; shift; source "$CHECK_FILE";
+        shift; CHECK_FILE="$1"; shift; source "$CHECK_FILE" || return $?;
         local -a __check__testPatterns=(); IFS='|' read -ra __check__testPatterns <<< "${CHECK_TEST_PATTERNS:-^test|^spec}"
         local __check__functionName __check__pattern
         for __check__functionName in $( declare -pF | awk '{ print $3 }' ); do
@@ -58,16 +64,16 @@ check() {
         return 0
         ;;
       runTestFunction)
-        shift; CHECK_FILE="$1"; shift; CHECK_TEST="$1"; shift; source "$CHECK_FILE";
+        shift; CHECK_FILE="$1"; shift; CHECK_TEST="$1"; shift; source "$CHECK_FILE" || return $?;
         [ "${CHECK_SET_E:-true}" = true ] && set -eE
-        if (( ${BASH_VERSINFO[0]} < 5 )); then
+        # if (( ${BASH_VERSINFO[0]} < 5 )); then
           local -a __check__debugTrap_previousInfo=()
           trap 'check -- debugTrap $? "$BASH_COMMAND" "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}"' DEBUG
           set -o functrace
-          trap ':' ERR
-        else
-          trap 'check -- errTrap' ERR
-        fi
+          trap 'check -- errTrap "${__check__debugTrap_previousInfo[@]}"' ERR
+        # else
+        #   trap 'check -- errTrap' ERR
+        # fi
         "$CHECK_TEST"; return $? ;;
       debugTrap)
         shift
@@ -78,19 +84,22 @@ check() {
           local __check__newline=$'\n'
           CHECK_FAILED_STACKTRACE="  \e[${CHECK_COLOR_NEUTRAL:-34}m${__check__debugTrap_previousInfo[1]}\e[0m:\e[${CHECK_COLOR_NEUTRAL:-34}m${__check__debugTrap_previousInfo[2]} ${__check__debugTrap_previousInfo[3]}${__check__newline}\e[0m"
           CHECK_FAILED_STACKTRACE+="  \e[${CHECK_COLOR_STACKTRACE:-33}m$( sed "${__check__debugTrap_previousInfo[2]}q;d" "${__check__debugTrap_previousInfo[1]}" | sed "s/^ *//g" | sed "s/^/  /" )\e[0m${__check__newline}"
-          declare -p CHECK_FAILED_STACKTRACE
-          return 1
         fi
         return 0
         ;;
       errTrap)
         local __check__newline=$'\n'
         CHECK_FAILED_STACKTRACE=
-        for (( i = 0 ; i < ${#BASH_LINENO[0]} ; i++ )); do
-          CHECK_FAILED_STACKTRACE+="  \e[${CHECK_COLOR_NEUTRAL:-34}m${BASH_SOURCE[i+1]}\e[0m:\e[${CHECK_COLOR_NEUTRAL:-34}m${BASH_LINENO[i]} ${FUNCNAME[i+1]}${__check__newline}\e[0m"
-          CHECK_FAILED_STACKTRACE+="  \e[${CHECK_COLOR_STACKTRACE:-33}m$( sed "${BASH_LINENO[i]}q;d" "${BASH_SOURCE[i+1]}" | sed "s/^ *//g" | sed "s/^/  /" )\e[0m${__check__newline}"
-        done
-        declare -p CHECK_FAILED_STACKTRACE
+        if (( $# > 1 )); then
+          CHECK_FAILED_STACKTRACE+="  \e[${CHECK_COLOR_NEUTRAL:-34}m$3\e[0m:\e[${CHECK_COLOR_NEUTRAL:-34}m$4 $5${__check__newline}\e[0m"
+          CHECK_FAILED_STACKTRACE+="  \e[${CHECK_COLOR_STACKTRACE:-33}m$( sed "${4}q;d" "$3" | sed "s/^ *//g" | sed "s/^/  /" )\e[0m${__check__newline}"
+        else
+          for (( i = 0 ; i < ${#BASH_LINENO[0]} ; i++ )); do
+            CHECK_FAILED_STACKTRACE+="  \e[${CHECK_COLOR_NEUTRAL:-34}m${BASH_SOURCE[i+1]}\e[0m:\e[${CHECK_COLOR_NEUTRAL:-34}m${BASH_LINENO[i]} ${FUNCNAME[i+1]}${__check__newline}\e[0m"
+            CHECK_FAILED_STACKTRACE+="  \e[${CHECK_COLOR_STACKTRACE:-33}m$( sed "${BASH_LINENO[i]}q;d" "${BASH_SOURCE[i+1]}" | sed "s/^ *//g" | sed "s/^/  /" )\e[0m${__check__newline}"
+          done
+        fi
+        [ "${CHECK_STACKTRACE:-true}" = true ] && declare -p CHECK_FAILED_STACKTRACE
         return 1
         ;;
       *) echo "check: unknown private command '$*'" >&2; return 1 ;;
@@ -118,21 +127,17 @@ check() {
         ;;
     esac
   done
-echo "FILES? ${CHECK_FILES[*]} DIRS? ${__check__directories[*]}"
 (( ${#CHECK_FILES[@]} == 0 )) && (( ${#__check__directories[@]} == 0 )) && __check__directories+=(".")
   for __check__directory in "${__check__directories[@]}"; do
-    echo "SEARCH DIR: $__check__directory"
     while read -rd '' CHECK_FILE; do
       for __check__pattern in "${__check__filePatterns[@]}"; do
         [[ "$CHECK_FILE" =~ $__check__pattern ]] && CHECK_FILES+=("$CHECK_FILE")
       done
     done < <( find "$__check__directory" -type f -name "*${CHECK_FILE_EXTENSION:-.sh}" -print0 )
   done
-  echo "FILES: ${CHECK_FILES[*]}"
   for CHECK_FILE in "${CHECK_FILES[@]}"; do
     if __check__output="$( check -- getTestNames "$CHECK_FILE" 2>&1 )"; then
       CHECK_FILE_TESTS=($__check__output)
-      echo
       if [ "${CHECK_RANDOM:-true}" = true ]; then
         for CHECK_TEST in $( printf '%q\n' "${CHECK_FILE_TESTS[@]}" | shuf ); do
           check -- displayTestResult "$( check -- runTest "$CHECK_FILE" "$CHECK_TEST" )"
@@ -146,14 +151,14 @@ echo "FILES? ${CHECK_FILES[*]} DIRS? ${__check__directories[*]}"
       echo "Failed to load '$CHECK_FILE'" >&2; echo "Output: $__check__output" >&2; return 1
     fi
   done
-  echo
   if (( CHECK_FAILED > 0 )); then
-    __check__output="\e[${CHECK_COLOR_FAIL:-31}m$CHECK_FAILED Tests Failed"
-    (( CHECK_PASSED > 0 )) && __check__output+=", $CHECK_PASSED Tests Passed"
+    __check__output="\e[${CHECK_COLOR_FAIL:-31}m$CHECK_FAILED Test(s) Failed"
+    (( CHECK_PASSED > 0 )) && __check__output+=", $CHECK_PASSED Test(s) Passed"
     __check__output+=".\e[0m"
     echo -e "$__check__output"
+    return 1
   else
-    echo -e "\e[${CHECK_COLOR_PASS:-32}m$CHECK_PASSED Tests Passed.\e[0m"
+    echo -e "\e[${CHECK_COLOR_PASS:-32}m$CHECK_PASSED Test(s) Passed.\e[0m"
   fi
 }
 [ "${BASH_SOURCE[0]}" = "$0" ] && check "$@"
