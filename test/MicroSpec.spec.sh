@@ -5,11 +5,13 @@ test.runsMainExampleOK() {
   then
     return 1 # The test is supposed to fail
   else
+    echo "BEFORE COLOR REMOVAL: $result"
     result="$( removeColorCodes "$result" )"
-    echo "Example Tests Result: $result"
+    echo "Example Tests Result: [$result]"
     [[ "$result" = *"[PASS] test.shouldPass"* ]]
     [[ "$result" = *"[FAIL] test.shouldFail"* ]]
-    [[ "$result" = *"./example.spec.sh:12 test.shouldFail()"* ]]
+    [[ "$result" = *"./example.spec.sh"* ]]
+    [[ "$result" = *"test.shouldFail()"* ]]
     [[ "$result" = *"(( 1 == 0 )) # <-- this fails so the test fails"* ]]
     [[ "$result" = *"1 test(s) failed"* ]]
   fi
