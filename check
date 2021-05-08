@@ -2,7 +2,6 @@
 
 check() {
   local -r CHECK_VERSION="1.0.0"; local CHECK_FILE="${CHECK_FILE}" CHECK_TEST="${CHECK_TEST}"
-
   if [ "$1" = -- ]; then
     shift
     case "$1" in
@@ -18,31 +17,25 @@ check() {
             eval "$( eval printf '%s\\n' "$__check__line" )"
           fi
         done <<< "$1"
-
         case "$CHECK_EXITCODE" in
-          0) echo -e "[\e[${CHECK_COLOR_PASS:-32}mPASS\e[0m] $CHECK_TEST" ;;
-          *) echo -e "[\e[${CHECK_COLOR_FAIL:-31}mFAIL\e[0m] $CHECK_TEST" ;;
+          0) echo -e "[\e[${CHECK_COLOR_PASS:-32}mPASS\e[0m] $CHECK_TEST"; (( CHECK_PASSED = CHECK_PASSED + 1 )) ;;
+          *) echo -e "[\e[${CHECK_COLOR_FAIL:-31}mFAIL\e[0m] $CHECK_TEST"; (( CHECK_FAILED = CHECK_FAILED + 1 )) ;;
         esac
-
         if [ -n "$CHECK_STDOUT" ] && { (( $CHECK_EXITCODE != 0 )) ||  [ "$VERBOSE" = true ]; }; then
           echo -e "\n  [\e[${CHECK_COLOR_NEUTRAL:-34}mStandard Output\e[0m]"
           printf '  %s\n' "$( echo "$CHECK_STDOUT" | sed 's/^/  /' )"
           [ -z "$CHECK_STDERR" ] && echo
         fi
-
         if [ -n "$CHECK_STDERR" ] && { (( $CHECK_EXITCODE != 0 )) ||  [ "$VERBOSE" = true ]; }; then
           echo -e "\n  [\e[${CHECK_COLOR_FAIL:-31}mStandard Error\e[0m]"
           printf '  %s\n' "$( echo "$CHECK_STDERR" | sed 's/^/  /' )"
           [ -z "$CHECK_FAILED_STACKTRACE" ] && (( ${#CHECK_FAILED_COMMAND_INFO} == 0 )) && echo
         fi
-
         if [ -n "$CHECK_FAILED_STACKTRACE" ] && { (( $CHECK_EXITCODE != 0 )) ||  [ "$VERBOSE" = true ]; }; then
           echo -e "\n  [\e[${CHECK_COLOR_STACKTRACE:-33}mStacktrace\e[0m]"
           echo -e "$( echo "$CHECK_FAILED_STACKTRACE" | sed 's/^/  /' )"
         fi
-        
-        return 0
-        ;;
+        return 0 ;;
       getTestNames)
         shift; CHECK_FILE="$1"; shift; source "$CHECK_FILE";
         local -a __check__testPatterns=(); IFS='|' read -ra __check__testPatterns <<< "${CHECK_TEST_PATTERNS:-^test|^spec}"
@@ -102,20 +95,40 @@ check() {
         ;;
       *) echo "check: unknown private command '$*'" >&2; return 1 ;;
     esac
+    return 0
   fi
-
-  local __check__pattern __check__output __check__exitCode CHECK_STDOUT CHECK_STDERR CHECK_EXITCODE CHECK_FAILED_STACKTRACE
-  local -a CHECK_FILES=() __check__filePatterns=() CHECK_FILE_TESTS=() CHECK_FAILED_COMMAND_INFO=()
+  local __check__pattern __check__directory __check__output __check__exitCode CHECK_STDOUT CHECK_STDERR CHECK_EXITCODE CHECK_FAILED_STACKTRACE CHECK_TEST_FILTER
+  local -a CHECK_FILES=() __check__directories=() __check__filePatterns=() CHECK_FILE_TESTS=() CHECK_FAILED_COMMAND_INFO=()
+  local -i CHECK_PASSED="$CHECK_PASSED" CHECK_FAILED="$CHECK_FAILED"
   IFS='|' read -ra __check__filePatterns <<< "${CHECK_FILE_PATTERNS:-.spec.sh$|.test.sh$}"
-
-  if (( ${#CHECK_FILES[@]} == 0 )); then
+  while (( $# > 0 )); do
+    case "$1" in
+      *)
+        if [ -d "$1" ]; then
+          __check__directories+=("$1"); shift
+        elif [ -f "$1" ]; then
+          local __check__added=
+          for __check__pattern in "${__check__filePatterns[@]}"; do
+            [[ "$1" =~ $__check__pattern ]] && { __check__added=true; CHECK_FILES+=("$1"); shift; break; }
+          done
+          [ -z "$__check__added" ] && { echo "check: unknown file argument '$*'" >&2; return 1; }
+        else
+          [ -z "$__check__added" ] && { echo "check: unknown argument '$*'" >&2; return 1; }
+        fi
+        ;;
+    esac
+  done
+echo "FILES? ${CHECK_FILES[*]} DIRS? ${__check__directories[*]}"
+(( ${#CHECK_FILES[@]} == 0 )) && (( ${#__check__directories[@]} == 0 )) && __check__directories+=(".")
+  for __check__directory in "${__check__directories[@]}"; do
+    echo "SEARCH DIR: $__check__directory"
     while read -rd '' CHECK_FILE; do
       for __check__pattern in "${__check__filePatterns[@]}"; do
         [[ "$CHECK_FILE" =~ $__check__pattern ]] && CHECK_FILES+=("$CHECK_FILE")
       done
-    done < <( find . -type f -name "*${CHECK_FILE_EXTENSION:-.sh}" -print0 )
-  fi
-
+    done < <( find "$__check__directory" -type f -name "*${CHECK_FILE_EXTENSION:-.sh}" -print0 )
+  done
+  echo "FILES: ${CHECK_FILES[*]}"
   for CHECK_FILE in "${CHECK_FILES[@]}"; do
     if __check__output="$( check -- getTestNames "$CHECK_FILE" 2>&1 )"; then
       CHECK_FILE_TESTS=($__check__output)
@@ -133,6 +146,14 @@ check() {
       echo "Failed to load '$CHECK_FILE'" >&2; echo "Output: $__check__output" >&2; return 1
     fi
   done
+  echo
+  if (( CHECK_FAILED > 0 )); then
+    __check__output="\e[${CHECK_COLOR_FAIL:-31}m$CHECK_FAILED Tests Failed"
+    (( CHECK_PASSED > 0 )) && __check__output+=", $CHECK_PASSED Tests Passed"
+    __check__output+=".\e[0m"
+    echo -e "$__check__output"
+  else
+    echo -e "\e[${CHECK_COLOR_PASS:-32}m$CHECK_PASSED Tests Passed.\e[0m"
+  fi
 }
-
 [ "${BASH_SOURCE[0]}" = "$0" ] && check "$@"
