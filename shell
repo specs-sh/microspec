@@ -23,4 +23,4 @@ then
   (( $? == 0 )) || { echo "Docker pull failed" >&2; exit 1; }
 fi
 
-docker run --rm -it -v "$PWD:/app" -w /app "bash:$version" bash "$@"
+docker run --rm -it -v "$PWD:/app" -w /app -e VERBOSE=true "bash:$version" bash "$@"

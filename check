@@ -1,0 +1,138 @@
+#! /usr/bin/env bash
+
+check() {
+  local -r CHECK_VERSION="1.0.0"; local CHECK_FILE="${CHECK_FILE}" CHECK_TEST="${CHECK_TEST}"
+
+  if [ "$1" = -- ]; then
+    shift
+    case "$1" in
+      displayTestResult)
+        shift; local __check__line
+        while IFS= read -r __check__line; do
+          if [[ "$__check__line" = *"declare -- CHECK_FAILED_STACKTRACE="* ]] && [[ "$__check__line" = *"declare -- CHECK_STDOUT"* ]]; then
+            local __check__stdoutAndFailedCommandInfo="$( eval printf '%s\\n' "$__check__line" )"
+            eval "$__check__stdoutAndFailedCommandInfo"
+            eval "declare -a CHECK_FAILED_STACKTRACE=${CHECK_STDOUT##*declare -a CHECK_FAILED_STACKTRACE=}"
+            CHECK_STDOUT="${CHECK_STDOUT%%declare -- CHECK_FAILED_STACKTRACE=*}"; CHECK_STDOUT="${CHECK_STDOUT%$'\n'}"
+          elif [[ "$__check__line" =~ ^declare ]]; then
+            eval "$( eval printf '%s\\n' "$__check__line" )"
+          fi
+        done <<< "$1"
+
+        case "$CHECK_EXITCODE" in
+          0) echo -e "[\e[${CHECK_COLOR_PASS:-32}mPASS\e[0m] $CHECK_TEST" ;;
+          *) echo -e "[\e[${CHECK_COLOR_FAIL:-31}mFAIL\e[0m] $CHECK_TEST" ;;
+        esac
+
+        if [ -n "$CHECK_STDOUT" ] && { (( $CHECK_EXITCODE != 0 )) ||  [ "$VERBOSE" = true ]; }; then
+          echo -e "\n  [\e[${CHECK_COLOR_NEUTRAL:-34}mStandard Output\e[0m]"
+          printf '  %s\n' "$( echo "$CHECK_STDOUT" | sed 's/^/  /' )"
+          [ -z "$CHECK_STDERR" ] && echo
+        fi
+
+        if [ -n "$CHECK_STDERR" ] && { (( $CHECK_EXITCODE != 0 )) ||  [ "$VERBOSE" = true ]; }; then
+          echo -e "\n  [\e[${CHECK_COLOR_FAIL:-31}mStandard Error\e[0m]"
+          printf '  %s\n' "$( echo "$CHECK_STDERR" | sed 's/^/  /' )"
+          [ -z "$CHECK_FAILED_STACKTRACE" ] && (( ${#CHECK_FAILED_COMMAND_INFO} == 0 )) && echo
+        fi
+
+        if [ -n "$CHECK_FAILED_STACKTRACE" ] && { (( $CHECK_EXITCODE != 0 )) ||  [ "$VERBOSE" = true ]; }; then
+          echo -e "\n  [\e[${CHECK_COLOR_STACKTRACE:-33}mStacktrace\e[0m]"
+          echo -e "$( echo "$CHECK_FAILED_STACKTRACE" | sed 's/^/  /' )"
+        fi
+        
+        return 0
+        ;;
+      getTestNames)
+        shift; CHECK_FILE="$1"; shift; source "$CHECK_FILE";
+        local -a __check__testPatterns=(); IFS='|' read -ra __check__testPatterns <<< "${CHECK_TEST_PATTERNS:-^test|^spec}"
+        local __check__functionName __check__pattern
+        for __check__functionName in $( declare -pF | awk '{ print $3 }' ); do
+          for __check__pattern in "${__check__testPatterns[@]}"; do
+            [[ "$__check__functionName" =~ $__check__pattern ]] && echo "$__check__functionName"
+          done
+        done
+        return 0 ;;
+      runTest)
+        printf '%s\n' "$({
+          CHECK_STDERR="$(
+            { CHECK_STDOUT="$( "$0" -- runTestFunction "$CHECK_FILE" "$CHECK_TEST" )" && CHECK_EXITCODE=$? || CHECK_EXITCODE=$?; } 2>&1
+            printf '%q\n' "$( declare -p CHECK_STDOUT )" >&2
+            printf '%q\n' "$( declare -p CHECK_EXITCODE )" >&2
+          )"
+          printf '%q\n' "$( declare -p CHECK_STDERR )"
+        } 2>&1 )"
+        return 0
+        ;;
+      runTestFunction)
+        shift; CHECK_FILE="$1"; shift; CHECK_TEST="$1"; shift; source "$CHECK_FILE";
+        [ "${CHECK_SET_E:-true}" = true ] && set -eE
+        if (( ${BASH_VERSINFO[0]} < 5 )); then
+          local -a __check__debugTrap_previousInfo=()
+          trap 'check -- debugTrap $? "$BASH_COMMAND" "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}"' DEBUG
+          set -o functrace
+          trap ':' ERR
+        else
+          trap 'check -- errTrap' ERR
+        fi
+        "$CHECK_TEST"; return $? ;;
+      debugTrap)
+        shift
+        if (( $1 == 0 )); then
+          shift
+          __check__debugTrap_previousInfo=("$@")
+        else
+          local __check__newline=$'\n'
+          CHECK_FAILED_STACKTRACE="  \e[${CHECK_COLOR_NEUTRAL:-34}m${__check__debugTrap_previousInfo[1]}\e[0m:\e[${CHECK_COLOR_NEUTRAL:-34}m${__check__debugTrap_previousInfo[2]} ${__check__debugTrap_previousInfo[3]}${__check__newline}\e[0m"
+          CHECK_FAILED_STACKTRACE+="  \e[${CHECK_COLOR_STACKTRACE:-33}m$( sed "${__check__debugTrap_previousInfo[2]}q;d" "${__check__debugTrap_previousInfo[1]}" | sed "s/^ *//g" | sed "s/^/  /" )\e[0m${__check__newline}"
+          declare -p CHECK_FAILED_STACKTRACE
+          return 1
+        fi
+        return 0
+        ;;
+      errTrap)
+        local __check__newline=$'\n'
+        CHECK_FAILED_STACKTRACE=
+        for (( i = 0 ; i < ${#BASH_LINENO[0]} ; i++ )); do
+          CHECK_FAILED_STACKTRACE+="  \e[${CHECK_COLOR_NEUTRAL:-34}m${BASH_SOURCE[i+1]}\e[0m:\e[${CHECK_COLOR_NEUTRAL:-34}m${BASH_LINENO[i]} ${FUNCNAME[i+1]}${__check__newline}\e[0m"
+          CHECK_FAILED_STACKTRACE+="  \e[${CHECK_COLOR_STACKTRACE:-33}m$( sed "${BASH_LINENO[i]}q;d" "${BASH_SOURCE[i+1]}" | sed "s/^ *//g" | sed "s/^/  /" )\e[0m${__check__newline}"
+        done
+        declare -p CHECK_FAILED_STACKTRACE
+        return 1
+        ;;
+      *) echo "check: unknown private command '$*'" >&2; return 1 ;;
+    esac
+  fi
+
+  local __check__pattern __check__output __check__exitCode CHECK_STDOUT CHECK_STDERR CHECK_EXITCODE CHECK_FAILED_STACKTRACE
+  local -a CHECK_FILES=() __check__filePatterns=() CHECK_FILE_TESTS=() CHECK_FAILED_COMMAND_INFO=()
+  IFS='|' read -ra __check__filePatterns <<< "${CHECK_FILE_PATTERNS:-.spec.sh$|.test.sh$}"
+
+  if (( ${#CHECK_FILES[@]} == 0 )); then
+    while read -rd '' CHECK_FILE; do
+      for __check__pattern in "${__check__filePatterns[@]}"; do
+        [[ "$CHECK_FILE" =~ $__check__pattern ]] && CHECK_FILES+=("$CHECK_FILE")
+      done
+    done < <( find . -type f -name "*${CHECK_FILE_EXTENSION:-.sh}" -print0 )
+  fi
+
+  for CHECK_FILE in "${CHECK_FILES[@]}"; do
+    if __check__output="$( check -- getTestNames "$CHECK_FILE" 2>&1 )"; then
+      CHECK_FILE_TESTS=($__check__output)
+      echo
+      if [ "${CHECK_RANDOM:-true}" = true ]; then
+        for CHECK_TEST in $( printf '%q\n' "${CHECK_FILE_TESTS[@]}" | shuf ); do
+          check -- displayTestResult "$( check -- runTest "$CHECK_FILE" "$CHECK_TEST" )"
+        done
+      else
+        for CHECK_TEST in $( printf '%q\n' "${CHECK_FILE_TESTS[@]}" ); do
+          check -- displayTestResult "$( check -- runTest "$CHECK_FILE" "$CHECK_TEST" )"
+        done
+      fi
+    else
+      echo "Failed to load '$CHECK_FILE'" >&2; echo "Output: $__check__output" >&2; return 1
+    fi
+  done
+}
+
+[ "${BASH_SOURCE[0]}" = "$0" ] && check "$@"
