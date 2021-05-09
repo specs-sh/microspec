@@ -1,0 +1,19 @@
+name: BASH 4.0
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shellbox-sh/bash-4.0-action@v1
+        with:
+          command: "bash --version | head -1"
+      - uses: shellbox-sh/bash-4.0-action@v1
+        with:
+          command: "./check test/"
