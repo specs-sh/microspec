@@ -1,4 +1,4 @@
-name: BASH 4.4
+name: Mac (BASH 3.2)
 
 on:
   push:
@@ -8,10 +8,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v2
       - run: "bash --version | head -1"
         shell: bash
-      - run: "./test/MicroSpec.spec.sh"
+      - run: "./check test/"
         shell: bash
