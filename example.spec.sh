@@ -10,7 +10,10 @@ test.shouldPass() {
   echo -e "\e[32mCOLORS\e[0m"
 
   # result="$( ls /this/doesnt/exist )"
-  result="$( ls /this/doesnt/exist )" || :
+  if result="$( ls /this/doesnt/exist )"
+  then
+    echo Cool
+  fi
   # exit 2
 
   (( 1 == 1 ))
