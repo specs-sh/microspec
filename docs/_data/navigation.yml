@@ -12,56 +12,56 @@ sidebar:
   url: "/docs"
   children:
   - title: '<i class="fas fa-cog"></i> Install'
-    url: "#"
+    url: "/docs#-install"
   - title: '<i class="fad fa-pencil"></i> Write test'
-    url: "#"
+    url: "/docs#-write-test"
   - title: '<i class="far fa-running"></i> Run test'
-    url: "#"
+    url: "/docs#-run-test"
   - title: '<i class="fad fa-language"></i> Test syntax'
-    url: "#"
+    url: "/docs#-test-syntax"
   - title: '<i class="fad fa-volcano"></i> About <code>set -e</code>'
-    url: "#"
+    url: "/docs#-about-set--e"
   - title: '<i class="fad fa-arrows-v"></i> Setup and Teardown'
-    url: "#"
+    url: "/docs#-setup-and-teardown"
 
 - title: '<i class="fad fa-terminal"></i> Options'
-  url: "#"
+  url: "/docs#-options"
   children:
   - title: '<code>&lt;file&gt; &lt;directory&gt;</code>'
-    url: "#"
+    url: "/docs#ltfilegt-ltdirectorygt"
   - title: '<code>-v / --verbose</code>'
-    url: "#"
+    url: "/docs#-v----verbose"
   - title: '<code>-q / --quiet</code>'
-    url: "#"
+    url: "/docs#-q----quiet"
   - title: '<code>-f / --filter</code>'
-    url: "#"
+    url: "/docs#-f----filter"
   - title: '<code>-c / --config</code>'
-    url: "#"
+    url: "/docs#-c----config"
   - title: '<code>-s / --set / --no-set</code>'
-    url: "#"
+    url: "/docs#-s----set----no-set"
   - title: '<code>--color / --no-color</code>'
-    url: "#"
+    url: "/docs#--color----no-color"
   - title: '<code>--random / --no-random</code>'
-    url: "#"
+    url: "/docs#--random----no-random"
   - title: '<code>--formatter</code>'
-    url: "#"
+    url: "/docs#--formatter"
   - title: '<code>--file-pattern</code>'
-    url: "#"
+    url: "/docs#--file-pattern"
   - title: '<code>--test-pattern</code>'
-    url: "#"
+    url: "/docs#--test-pattern"
   - title: '<code>--setup-pattern</code>'
-    url: "#"
+    url: "/docs#--setup-pattern"
   - title: '<code>--teardown-pattern</code>'
-    url: "#"
+    url: "/docs#--teardown-pattern"
 
 - title: '<i class="fad fa-cog"></i> Customization'
-  url: "#installation"
+  url: "/docs#-customization"
   children:
   - title: '<i class="fad fa-feather-alt"></i> Customize Test Syntax'
-    url: "#"
+    url: "/docs#-customize-test-syntax"
   - title: '<i class="fad fa-fish"></i> Test Hooks'
-    url: "#"
+    url: "/docs#-test-hooks"
   - title: '<i class="fad fa-print"></i> Write Formatters'
-    url: "#"
+    url: "/docs#-write-formatters"
   - title: '<i class="fad fa-palette"></i> Customize Colors'
-    url: "#"
+    url: "/docs#-customize-colors"

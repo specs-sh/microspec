@@ -145,6 +145,11 @@ By default, test files are run with the following BASH options configured:
 The `errexit` option (_or `set -e` for short_) is what allows us to immediately
 fail a test whenever any statement is executed which returns a non-zero exit code.
 
+Without this feature enabled, tests will fail in one of these cases:
+
+- A test fails if the function returns a non-zero exit code, e.g. `return 1`
+- A test fails if the function exits with a non-zero exit code, e.g. `exit 1`
+
 ## <i class="fad fa-arrows-v"></i> Setup and Teardown
 
 
