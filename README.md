@@ -8,7 +8,7 @@
 
 `$ ./check` is a _very tiny_ but flexible testing library for shell scripts.
 
-<img alt="Screenshot of check test output" src="screenshot.png">
+<img alt="Screenshot of check test output" src="screenshot.png" height=300>
 
 ---
 
