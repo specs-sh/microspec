@@ -74,7 +74,7 @@ author:
       url: "https://github.com/shellbox-sh/check"
     - label: "Download"
       icon: "fab fas fa-download"
-      url: "#"
+      url: "https://github.com/specs-sh/check/releases"
 
 footer:
   links:

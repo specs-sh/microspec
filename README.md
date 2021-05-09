@@ -3,6 +3,8 @@
 # ☑️ `$ check`
 
 > Tiny Shell Script Test Framework ( < 50 LOC)
+>
+> 📖 https://check.specs.sh _for full documentation_
 
 ---
 
@@ -75,3 +77,6 @@ $ check [options] [files or folders containing test files]
 > Just sounded like an interesting challenge.  
 > The executable is also under 10K which was my initial goal.  
 > The 49 LOC are pretty tightly squished, but - _meh_ - it was fun!
+
+---
+

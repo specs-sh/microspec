@@ -5,7 +5,7 @@ main:
 - title: '<i class="fab fa-github"></i> GitHub'
   url: "https://github.com/specs-sh/check"
 - title: '<i class="fas fa-download"></i> Download'
-  url: "#"
+  url: "https://github.com/specs-sh/check/releases"
 
 sidebar:
 - title: '<i class="fad fa-books"></i> Documentation'
