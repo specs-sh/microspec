@@ -16,4 +16,4 @@ jobs:
           command: "bash --version | head -1"
       - uses: shellbox-sh/bash-4.0-action@v1.2
         with:
-          command: "./check test/"
+          command: "VERBOSE=true ./check test/"
