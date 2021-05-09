@@ -2,7 +2,7 @@
 
 # ☑️ `$ check`
 
-> Tiny BASH Test Framework ( < 50 LOC)
+> Tiny Shell Script Test Framework ( < 50 LOC)
 
 ---
 
