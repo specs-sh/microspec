@@ -9,7 +9,7 @@ runTest() {
   trap 'recordCommands $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}";' DEBUG; trap : ERR
   runAll "${CHECK_TEARDOWN_PATTERN:-^setup\|^before}"; $CHECK_TEST; CHECK_RESULT=$?; exit $CHECK_RESULT;
 }
-runAll() { :; } # if CHECK_FUNCTIONS=($( declare -pF | awk '{print $3}' | grep -i "${CHECK_TEST_PATTERN:-^test\|^spec\|^@test\|^@spec}" 2>/dev/null )) }
+runAll() { if CHECK_FUNCTIONS="$( declare -pF | awk '{print $3}' | grep -i "$1" 2>/dev/null )"; then for CHECK_FUNCTION in $CHECK_FUNCTIONS; do $CHECK_FUNCTION; done; fi; }
 getColor() { [ "$CHECK_COLOR" = true ] && printf '\e[%sm' "${!1}"; return 0; }
 runAndDisplayOutput() {
   [ -n "$CHECK_FILTER" ] && { echo "$CHECK_TEST" | grep "$CHECK_FILTER" &>/dev/null || return 0; }
