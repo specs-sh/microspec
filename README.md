@@ -2,21 +2,38 @@
 
 # ☑️ `$ check`
 
-> Tiny BASH Test Framework (< 50 LOC)
+> Tiny BASH Test Framework ( < 50 LOC)
 
 ---
 
-`$ ./check` is a tiny, flexible, pretty testing library for shell scripts.
+`$ ./check` is a _very tiny_ but flexible testing library for shell scripts.
 
 <img alt="Screenshot of check test output" src="screenshot.png">
 
 ---
 
-**Why?**
-
-> I wanted something _small_ that I could copy/paste into my projects. _And this is it!_
+- Supports Mac OS X default BASH version (`3.2.57`)
+- Supports modern BASH versions (`4.0`, `4.4`, `5.0`)
 
 ---
 
-- Supports Mac OS X default BASH version (`3.2.57`)
-- Supports modern BASH versions (`4.0`, `5.0`)
+```sh
+# Setup code goes here
+
+test.shouldPass() {
+  echo "STDOUT from shouldPass"
+  echo "STDERR from shouldPass" >&2
+  (( 1 == 1 ))
+}
+
+test.shouldFail() {
+  echo "STDOUT from shouldFail"
+  echo "STDERR from shouldFail" >&2
+  (( 1 == 0 )) # <-- this fails so the test fails
+  (( 1 == 1 )) # <-- even though the final result passes
+}
+```
+
+> By default, `check` tests fail if _any statement fails_ (_using `set -e`_)
+
+---
