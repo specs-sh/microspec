@@ -15,3 +15,5 @@ jobs:
         shell: bash
       - run: "./check test/"
         shell: bash
+        env:
+          VERBOSE: true
