@@ -1,3 +1,6 @@
+setup()    { echo "Hello from setup.";    }
+teardown() { echo "Hello from teardown."; }
+
 test.shouldPass() {
   echo "STDOUT from shouldPass"
   echo "STDERR from shouldPass" >&2

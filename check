@@ -1,16 +1,18 @@
 #! /usr/bin/env bash
-set -eETu; shopt | grep compat32 &>/dev/null && shopt -s compat32
-CHECK_COLOR="${CHECK_COLOR:-true}" CHECK_SILENT="${CHECK_SILENT:-}" CHECK_VERBOSE="${VERBOSE:-}" CHECK_COLOR_TEXT="${CHECK_COLOR_TEXT:-39}" CHECK_COLOR_FAIL="${CHECK_COLOR_FAIL:-31}" CHECK_COLOR_FAIL_RESULT="${CHECK_COLOR_FAIL_RESULT:-31;1}" CHECK_COLOR_PASS="${CHECK_COLOR_PASS:-32}" CHECK_COLOR_PASS_RESULT="${CHECK_COLOR_PASS_RESULT:-32;1}" CHECK_COLOR_NEUTRAL="${CHECK_COLOR_NEUTRAL:-34}" CHECK_COLOR_CODE="${CHECK_COLOR_CODE:-33}" CHECK_COLOR_RESET="${CHECK_COLOR_RESET:-0}" CHECK_COLOR_STDOUT="${CHECK_COLOR_STDOUT:-39;2}" CHECK_COLOR_STDOUT_HEADER="${CHECK_COLOR_STDOUT_HEADER:-34;1}" CHECK_COLOR_STDERR="${CHECK_COLOR_STDERR:-39;2}" CHECK_COLOR_STDERR_HEADER="${CHECK_COLOR_STDERR_HEADER:-31;1}" CHECK_COLOR_STACKTRACE_HEADER="${CHECK_COLOR_STACKTRACE_HEADER:-33;1}" CHECK_COLOR_FILENAME="${CHECK_COLOR_FILENAME:-34}"
+set -eETuo pipefail; shopt | grep compat32 &>/dev/null && shopt -s compat32
+CHECK_COLOR="${CHECK_COLOR:-true}" CHECK_SILENT="${CHECK_SILENT:-}" CHECK_VERBOSE="${VERBOSE:-}" CHECK_FILTER="${CHECK_FILTER:-}" CHECK_COLOR_TEXT="${CHECK_COLOR_TEXT:-39}" CHECK_COLOR_FAIL="${CHECK_COLOR_FAIL:-31}" CHECK_COLOR_FAIL_RESULT="${CHECK_COLOR_FAIL_RESULT:-31;1}" CHECK_COLOR_PASS="${CHECK_COLOR_PASS:-32}" CHECK_COLOR_PASS_RESULT="${CHECK_COLOR_PASS_RESULT:-32;1}" CHECK_COLOR_NEUTRAL="${CHECK_COLOR_NEUTRAL:-34}" CHECK_COLOR_CODE="${CHECK_COLOR_CODE:-33}" CHECK_COLOR_RESET="${CHECK_COLOR_RESET:-0}" CHECK_COLOR_STDOUT="${CHECK_COLOR_STDOUT:-39;2}" CHECK_COLOR_STDOUT_HEADER="${CHECK_COLOR_STDOUT_HEADER:-34;1}" CHECK_COLOR_STDERR="${CHECK_COLOR_STDERR:-39;2}" CHECK_COLOR_STDERR_HEADER="${CHECK_COLOR_STDERR_HEADER:-31;1}" CHECK_COLOR_STACKTRACE_HEADER="${CHECK_COLOR_STACKTRACE_HEADER:-33;1}" CHECK_COLOR_FILENAME="${CHECK_COLOR_FILENAME:-34}"
 recordCommands() { __check__return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ]; then CHECK_LAST_COMMAND_INFO=("${@:2}"); fi; return $__check__return; } # return 0; }
 runTest() {
   declare -p CHECK_SET &>/dev/null && [ -z "$CHECK_SET" ] || set "-${CHECK_SET:-eETu}"
-  trap 'declare -p CHECK_LAST_COMMAND_INFO' EXIT
+  trap 'runAll "${CHECK_TEARDOWN_PATTERN:-^teardown\|^after}"; declare -p CHECK_LAST_COMMAND_INFO' EXIT
   trap 'shopt -qo nounset && __check__nounset=true || __check__nounset=""; set +u; recordCommands $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}"; [ -n "$__check__nounset" ] && set +u;' DEBUG;
   trap 'recordCommands $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}";' DEBUG; trap : ERR
-  $CHECK_TEST; CHECK_RESULT=$?; return $CHECK_RESULT;
+  runAll "${CHECK_TEARDOWN_PATTERN:-^setup\|^before}"; $CHECK_TEST; CHECK_RESULT=$?; exit $CHECK_RESULT;
 }
+runAll() { :; } # if CHECK_FUNCTIONS=($( declare -pF | awk '{print $3}' | grep -i "${CHECK_TEST_PATTERN:-^test\|^spec\|^@test\|^@spec}" 2>/dev/null )) }
 getColor() { [ "$CHECK_COLOR" = true ] && printf '\e[%sm' "${!1}"; return 0; }
 runAndDisplayOutput() {
+  [ -n "$CHECK_FILTER" ] && echo "$CHECK_TEST" | grep "$CHECK_FILTER" &>/dev/null || return 0;
   CHECK_TEST_OUTPUT="$({ CHECK_STDERR="$({ CHECK_STDOUT="$( "$0" --run "$CHECK_FILE" "$CHECK_TEST" )"; } 2>&1; declare -i CHECK_RESULT=$?; declare -p CHECK_STDOUT >&2; declare -p CHECK_RESULT >&2; exit $CHECK_RESULT;)"; declare -p CHECK_STDERR; exit 0; } 2>&1 )"
   eval "$CHECK_TEST_OUTPUT"; CHECK_LAST_COMMAND_INFO_TEXT=
   [[ "$CHECK_STDOUT" =~ .*(declare[[:space:]]-a[[:space:]]CHECK_LAST_COMMAND_INFO=[\']?\(.*)$ ]] && CHECK_LAST_COMMAND_INFO_TEXT="${BASH_REMATCH[1]}"
@@ -27,14 +29,17 @@ runAndDisplayOutput() {
     echo -e "    $(getColor CHECK_COLOR_TEXT)[$(getColor CHECK_COLOR_STACKTRACE_HEADER)Stacktrace$(getColor CHECK_COLOR_RESET)$(getColor CHECK_COLOR_TEXT)]\n      $(getColor CHECK_COLOR_NEUTRAL)${CHECK_LAST_COMMAND_INFO[0]}$(getColor CHECK_COLOR_TEXT):$(getColor CHECK_COLOR_NEUTRAL)${CHECK_LAST_COMMAND_INFO[1]} ${CHECK_LAST_COMMAND_INFO[2]}\n$(getColor CHECK_COLOR_CODE)$( sed "${CHECK_LAST_COMMAND_INFO[1]}q;d" "${CHECK_LAST_COMMAND_INFO[0]}" | sed "s/^ *//g" | sed "s/^/      /" )$(getColor CHECK_COLOR_RESET)";
   }; return 0
 }
-(( $# > 0 )) && { case "$1" in
-  -h | --help) echo "$0: <test file> <test file> ..."; exit 0 ;;
-  --list) shift; CHECK_FILE="$1"; shift; source "$CHECK_FILE" && declare -pF | awk '{print $3}' | grep "${CHECK_TEST_PATTERN:-^test\|^spec}"; exit 0 ;;
+(( $# > 0 )) && { case "$1" in -h|--help) echo "${0##*/}: <test file> <test file> ..."; exit 0 ;;
+  --list) shift; CHECK_FILE="$1"; shift; source "$CHECK_FILE" && declare -pF | awk '{print $3}' | grep -i "${CHECK_TEST_PATTERN:-^test\|^spec\|^@test\|^@spec}" 2>/dev/null; exit 0 ;;
   --run) shift; CHECK_FILE="$1"; shift; CHECK_TEST="$1"; shift; source "$CHECK_FILE" && runTest; exit $? ;;
 esac; }
-CHECK_PASSED=0; CHECK_FAILED=0; CHECK_FILES=(); CHECK_DIRS=(); while (( $# > 0 )); do [ -f "$1" ] && { CHECK_FILES+=("$1"); shift; } || { [ -d "$1" ] && { CHECK_DIRS+=("$1"); shift; } || { echo "check: unknown argument '$*'" >&2; exit 1; }; }; done
+CHECK_PASSED=0; CHECK_FAILED=0; CHECK_FILES=(); CHECK_DIRS=(); while (( $# > 0 )); do case "$1" in
+  -v|--verbose) CHECK_VERBOSE=true; shift ;; -s|--silent|-q|--quiet) CHECK_SILENT=true; shift ;; -f|--filter) CHECK_FILTER="$2"; shift 2 ;;
+  *) [ -f "$1" ] && { CHECK_FILES+=("$1"); shift; } || { [ -d "$1" ] && { CHECK_DIRS+=("$1"); shift; } || { echo "${0##*/}: unknown argument '$*'" >&2; exit 1; }; }
+esac; done
 (( ${#CHECK_DIRS[@]} > 0 )) && { for CHECK_DIR in "${CHECK_DIRS[@]}"; do while read -rd '' CHECK_FILE; do echo "$CHECK_FILE" | grep "${CHECK_FILE_PATTERN:-.test.sh$\|.spec.sh$}" &>/dev/null && CHECK_FILES+=("$CHECK_FILE"); done < <( find "$CHECK_DIR" -type f -name "*${CHECK_FILE_EXT:-.sh}" -print0 ); done; }
-(( ${#CHECK_FILES[@]} == 0 )) && { while read -rd '' CHECK_FILE; do echo "$CHECK_FILE" | grep "${CHECK_FILE_PATTERN:-.test.sh$\|.spec.sh$}" &>/dev/null && CHECK_FILES+=("$CHECK_FILE"); done < <( find . -type f -name "*${CHECK_FILE_EXT:-.sh}" -print0 ); }
+(( ${#CHECK_FILES[@]} == 0 )) && { while read -rd '' CHECK_FILE; do echo "$CHECK_FILE" | grep -i "${CHECK_FILE_PATTERN:-.test.sh$\|.spec.sh$}" &>/dev/null && CHECK_FILES+=("$CHECK_FILE"); done < <( find . -type f -name "*${CHECK_FILE_EXT:-.sh}" -print0 ); }
+(( ${#CHECK_FILES[@]} == 0 )) && { echo -e "${0##*/}: No test files provided to run.\nUsage: ${0##*/} <test file> <test file>"; exit 0; }
 for CHECK_FILE in "${CHECK_FILES[@]}"; do
   CHECK_TESTS="$( "$0" --list "$CHECK_FILE" )" || { echo "Failed to find tests in file: '$CHECK_FILE'" >&2; exit 1; }
   [ "$CHECK_SILENT" != true ] && echo -e "$(getColor CHECK_COLOR_TEXT)[$(getColor CHECK_COLOR_FILENAME)$CHECK_FILE$(getColor CHECK_COLOR_RESET)$(getColor CHECK_COLOR_TEXT)]"; for CHECK_TEST in $CHECK_TESTS; do runAndDisplayOutput; done; [ "$CHECK_SILENT" != true ] && echo;

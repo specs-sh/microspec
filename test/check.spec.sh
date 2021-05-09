@@ -3,7 +3,7 @@ test.runsMainExampleOK() {
   echo "$result"
   [[ "$result" = *"[PASS] test.shouldPass"* ]]
   [[ "$result" = *"[FAIL] test.shouldFail"* ]]
-  [[ "$result" = *"example.spec.sh:10 test.shouldFail"* ]]
+  [[ "$result" = *"example.spec.sh:13 test.shouldFail"* ]]
   [[ "$result" = *"(( 1 == 0 )) # <-- this fails so the test fails"* ]]
   [[ "$result" = *"1 Test(s) Failed"* ]]
 }
