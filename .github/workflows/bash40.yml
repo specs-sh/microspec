@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: shellbox-sh/bash-4.0-action@v1.1
+      - uses: shellbox-sh/bash-4.0-action@v1.2
         with:
           command: "bash --version | head -1"
-      - uses: shellbox-sh/bash-4.0-action@v1.1
+      - uses: shellbox-sh/bash-4.0-action@v1.2
         with:
           command: "./check test/"
