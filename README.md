@@ -2,7 +2,7 @@
 
 # ☑️ `$ check`
 
-> Tiny BASH Test Framework ( < 50 LOC)
+> Tiny Shell Script Test Framework ( < 50 LOC)
 
 ---
 
@@ -16,6 +16,8 @@
 - Supports modern BASH versions (`4.0`, `4.4`, `5.0`)
 
 ---
+
+### Example Test
 
 ```sh
 # Setup code goes here
