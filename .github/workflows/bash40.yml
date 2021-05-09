@@ -11,9 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: shellbox-sh/bash-4.0-action@v1.2
+      - name: Get Bash Version
+        id: get-bash-version
+        uses: shellbox-sh/bash-4.0-action@v1.2
         with:
           command: "bash --version | head -1"
-      - uses: shellbox-sh/bash-4.0-action@v1.2
+      - name: Display Bash Version
+        run: echo "${{ steps.get-bash-version.outputs.output }}"
+      - name: Run Tests
+        id: run-tests
+        uses: shellbox-sh/bash-4.0-action@v1.2
         with:
           command: "VERBOSE=true ./check test/"
+      - name: Display Test Results
+        run: echo "${{ steps.run-tests.outputs.output }}"
