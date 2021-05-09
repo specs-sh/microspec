@@ -1,0 +1,132 @@
+---
+main:
+- title: '<i class="fad fa-books"></i> Read Docs'
+  url: "/docs"
+- title: '<i class="fab fa-github"></i> GitHub'
+  url: "https://github.com/specs-sh/check"
+- title: '<i class="fas fa-download"></i> Download'
+  url: "#"
+
+sidebar:
+- title: '<i class="fad fa-books"></i> Documentation'
+  url: "/docs"
+  children:
+  - title: '<i class="fas fa-cog"></i> Install'
+    url: "#"
+  - title: '<i class="fad fa-pencil"></i> Write test'
+    url: "#"
+
+- title: '<i class="fad fa-terminal"></i> Options'
+  url: "#"
+  children:
+  - title: '<code>&lt;file&gt; &lt;directory&gt;</code>'
+    url: "#"
+  - title: '<code>-v / --verbose</code>'
+    url: "#"
+  - title: '<code>-q / --quiet</code>'
+    url: "#"
+  - title: '<code>-f / --filter</code>'
+    url: "#"
+  - title: '<code>-c / --config</code>'
+    url: "#"
+  - title: '<code>-s / --set / --no-set</code>'
+    url: "#"
+  - title: '<code>--color / --no-color</code>'
+    url: "#"
+  - title: '<code>--random / --no-random</code>'
+    url: "#"
+  - title: '<code>--formatter</code>'
+    url: "#"
+  - title: '<code>--file-pattern</code>'
+    url: "#"
+  - title: '<code>--test-pattern</code>'
+    url: "#"
+  - title: '<code>--setup-pattern</code>'
+    url: "#"
+  - title: '<code>--teardown-pattern</code>'
+    url: "#"
+
+- title: '<i class="fad fa-cog"></i> Customization'
+  url: "#installation"
+  children:
+  - title: '<i class="fad fa-feather-alt"></i> Custom Test Syntax'
+    url: "#"
+  - title: '<i class="fad fa-palette"></i> Custom Colors'
+    url: "#"
+  - title: '<i class="fad fa-print"></i> Custom Formatters'
+    url: "#"
+
+sidebar_2:
+- title: '<i class="fad fa-cog"></i> Installation'
+  url: "#installation"
+  children:
+  - title: '<i class="fas fa-cog"></i> Use Install Script'
+    url: "#"
+  - title: '<i class="fas fa-cogs"></i> Manual Installation'
+    url: "#"
+
+- title: '<i class="fad fa-graduation-cap"></i> Basics'
+  url: "#"
+  children:
+  - title: '<i class="fad fa-code"></i> Use with scripts'
+    url: "#"
+  - title: '<i class="fas fa-function"></i> Use with functions'
+    url: "#"
+  - title: '<i class="fad fa-dollar-sign"></i> Setting Variables'
+    url: "#"
+  - title: '<i class="fad fa-quote-right"></i> Printing to STDOUT'
+    url: "#"
+
+- title: '<i class="fad fa-brackets-curly"></i> Arguments'
+  url: "#"
+  children:
+  - title: '<i class="fad fa-terminal"></i> <code>getargs {varname}</code>'
+    url: "#"
+  - title: '<i class="fad fa-ellipsis-h-alt"></i> List Arguments <code>{items...}</code>'
+    url: "#"
+  - title: '<i class="fal fa-question"></i> Optional Arguments <code>{varname?}</code>'
+    url: "#"
+
+- title: '<i class="fad fa-value-absolute"></i> Options'
+  url: "#"
+  children:
+  - title: '<i class="fad fa-terminal"></i> <code>getargs -o/--option {varname}</code>'
+    url: "#"
+  - title: '↳ Shorthand: <code>-o/--{varname}</code>'
+    url: "#"
+
+- title: '<i class="fad fa-pennant"></i> Flags'
+  url: "#"
+  children:
+  - title: '<i class="fad fa-terminal"></i> <code>getargs +f/-flag {varname}</code>'
+    url: "#"
+  - title: '↳ Shorthand: <code>+f/-{varname}</code>'
+    url: "#"
+
+- title: '<i class="fad fa-check-double"></i> Validation'
+  url: "#"
+  children:
+  - title: '<i class="fas fa-divide"></i> Parsing Numbers'
+    url: "#"
+  - title: '<i class="fad fa-check"></i> Parsing Booleans'
+    url: "#"
+  - title: '<i class="fas fa-tilde"></i> Parsing Patterns'
+    url: "#"
+  - title: '<i class="fad fa-brackets"></i> Custom Validation'
+    url: "#"
+
+- title: '<i class="fad fa-tools"></i> Configuration'
+  url: "/docs/config"
+  children:
+  - title: '<i class="fad fa-wrench"></i> Configure Features using <code>GETARGS=+-</code>'
+    url: "#"
+  - title: '<i class="fad fa-comment-lines"></i> Useful Error Messages <code>GETARGS_ERROR</code>'
+    url: "#"
+
+- title: '<i class="fad fa-tachometer-alt-fast"></i> Performance'
+  url: "#performance"
+  children:
+  - title: '<i class="fad fa-chart-bar"></i> Parse Times (<code>0.2ms - 2ms</code>)'
+    url: "#"
+  - title: '<i class="fal fa-tachometer-alt-fast"></i> Optimizing Performance'
+    url: "#"
