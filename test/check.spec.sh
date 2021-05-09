@@ -1,6 +1,7 @@
 test.runsMainExampleOK() {
   local result="$( ./check example.spec.sh 2>&1 )" && : || :
   result="$( removeColorCodes "$result" )"
+  echo "$result"
   [[ "$result" = *"[PASS] test.shouldPass"* ]]
   [[ "$result" = *"[FAIL] test.shouldFail"* ]]
   [[ "$result" = *"example.spec.sh:10 test.shouldFail"* ]]
