@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 set -eETu; shopt | grep compat32 &>/dev/null && shopt -s compat32
-CHECK_SILENT="${CHECK_SILENT:-}" CHECK_VERBOSE="${VERBOSE:-}" CHECK_COLOR_TEXT="${CHECK_COLOR_TEXT:-39}" CHECK_COLOR_FAIL="${CHECK_COLOR_FAIL:-31}" CHECK_COLOR_FAIL_RESULT="${CHECK_COLOR_FAIL_RESULT:-31;1}" CHECK_COLOR_PASS="${CHECK_COLOR_PASS:-32}" CHECK_COLOR_PASS_RESULT="${CHECK_COLOR_PASS_RESULT:-32;1}" CHECK_COLOR_NEUTRAL="${CHECK_COLOR_NEUTRAL:-34}" CHECK_COLOR_CODE="${CHECK_COLOR_CODE:-33}" CHECK_COLOR_RESET="${CHECK_COLOR_RESET:-0}" CHECK_COLOR_STDOUT="${CHECK_COLOR_STDOUT:-39;2}" CHECK_COLOR_STDOUT_HEADER="${CHECK_COLOR_STDOUT_HEADER:-34;1}" CHECK_COLOR_STDERR="${CHECK_COLOR_STDERR:-39;2}" CHECK_COLOR_STDERR_HEADER="${CHECK_COLOR_STDERR_HEADER:-31;1}" CHECK_COLOR_STACKTRACE_HEADER="${CHECK_COLOR_STACKTRACE_HEADER:-33;1}" CHECK_COLOR_FILENAME="${CHECK_COLOR_FILENAME:-34}"
+CHECK_COLOR="${CHECK_COLOR:-true}" CHECK_SILENT="${CHECK_SILENT:-}" CHECK_VERBOSE="${VERBOSE:-}" CHECK_COLOR_TEXT="${CHECK_COLOR_TEXT:-39}" CHECK_COLOR_FAIL="${CHECK_COLOR_FAIL:-31}" CHECK_COLOR_FAIL_RESULT="${CHECK_COLOR_FAIL_RESULT:-31;1}" CHECK_COLOR_PASS="${CHECK_COLOR_PASS:-32}" CHECK_COLOR_PASS_RESULT="${CHECK_COLOR_PASS_RESULT:-32;1}" CHECK_COLOR_NEUTRAL="${CHECK_COLOR_NEUTRAL:-34}" CHECK_COLOR_CODE="${CHECK_COLOR_CODE:-33}" CHECK_COLOR_RESET="${CHECK_COLOR_RESET:-0}" CHECK_COLOR_STDOUT="${CHECK_COLOR_STDOUT:-39;2}" CHECK_COLOR_STDOUT_HEADER="${CHECK_COLOR_STDOUT_HEADER:-34;1}" CHECK_COLOR_STDERR="${CHECK_COLOR_STDERR:-39;2}" CHECK_COLOR_STDERR_HEADER="${CHECK_COLOR_STDERR_HEADER:-31;1}" CHECK_COLOR_STACKTRACE_HEADER="${CHECK_COLOR_STACKTRACE_HEADER:-33;1}" CHECK_COLOR_FILENAME="${CHECK_COLOR_FILENAME:-34}"
 recordCommands() { __check__return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ]; then CHECK_LAST_COMMAND_INFO=("${@:2}"); fi; return $__check__return; } # return 0; }
 runTest() {
   declare -p CHECK_SET &>/dev/null && [ -z "$CHECK_SET" ] || set "-${CHECK_SET:-eETu}"
@@ -9,21 +9,22 @@ runTest() {
   trap 'recordCommands $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}";' DEBUG; trap : ERR
   $CHECK_TEST; CHECK_RESULT=$?; return $CHECK_RESULT;
 }
+getColor() { [ "$CHECK_COLOR" = true ] && printf '\e[%sm' "${!1}"; return 0; }
 runAndDisplayOutput() {
   CHECK_TEST_OUTPUT="$({ CHECK_STDERR="$({ CHECK_STDOUT="$( "$0" --run "$CHECK_FILE" "$CHECK_TEST" )"; } 2>&1; declare -i CHECK_RESULT=$?; declare -p CHECK_STDOUT >&2; declare -p CHECK_RESULT >&2; exit $CHECK_RESULT;)"; declare -p CHECK_STDERR; exit 0; } 2>&1 )"
   eval "$CHECK_TEST_OUTPUT"; CHECK_LAST_COMMAND_INFO_TEXT=
   [[ "$CHECK_STDOUT" =~ .*(declare[[:space:]]-a[[:space:]]CHECK_LAST_COMMAND_INFO=[\']?\(.*)$ ]] && CHECK_LAST_COMMAND_INFO_TEXT="${BASH_REMATCH[1]}"
   [ -n "$CHECK_LAST_COMMAND_INFO_TEXT" ] && { eval "$CHECK_LAST_COMMAND_INFO_TEXT"; CHECK_STDOUT="${CHECK_STDOUT%"$CHECK_LAST_COMMAND_INFO_TEXT"}"; CHECK_STDOUT="${CHECK_STDOUT%$'\n'}"; }
   (( CHECK_RESULT == 0 )) && { CHECK_STATUS=PASS; CHECK_STATUS_COLOR="$CHECK_COLOR_PASS"; (( CHECK_PASSED = CHECK_PASSED + 1 )); } || { CHECK_STATUS=FAIL; CHECK_STATUS_COLOR="$CHECK_COLOR_FAIL"; (( CHECK_FAILED = CHECK_FAILED + 1 )); }
-  [ "$CHECK_SILENT" != true ] && echo -e "  \e[${CHECK_COLOR_TEXT}m[\e[${CHECK_STATUS_COLOR}m$CHECK_STATUS\e[${CHECK_COLOR_TEXT}m] $CHECK_TEST"
+  [ "$CHECK_SILENT" != true ] && echo -e "  $(getColor CHECK_COLOR_TEXT)[$(getColor CHECK_STATUS_COLOR)$CHECK_STATUS$(getColor CHECK_COLOR_TEXT)] $CHECK_TEST"
   [ -n "$CHECK_STDOUT" ] && [ "$CHECK_SILENT" != true ] && { (( CHECK_RESULT != 0 )) || [ "$CHECK_VERBOSE" = true ]; } && {
-    echo -e "    \e[${CHECK_COLOR_TEXT}m[\e[${CHECK_COLOR_STDOUT_HEADER}mStandard Output\e[${CHECK_COLOR_RESET}m\e[${CHECK_COLOR_TEXT}m]\e[${CHECK_COLOR_STDOUT}m\n$( echo "$CHECK_STDOUT" | sed 's/^/      /' )\e[${CHECK_COLOR_RESET}m";
+    echo -e "    $(getColor CHECK_COLOR_TEXT)[$(getColor CHECK_COLOR_STDOUT_HEADER)Standard Output$(getColor CHECK_COLOR_RESET)$(getColor CHECK_COLOR_TEXT)]$(getColor CHECK_COLOR_STDOUT)\n$( echo "$CHECK_STDOUT" | sed 's/^/      /' )$(getColor CHECK_COLOR_RESET)";
   }
   [ -n "$CHECK_STDERR" ] && [ "$CHECK_SILENT" != true ] && { (( CHECK_RESULT != 0 )) || [ "$CHECK_VERBOSE" = true ]; } && {
-    echo -e "    \e[${CHECK_COLOR_TEXT}m[\e[${CHECK_COLOR_STDERR_HEADER}mStandard Error\e[${CHECK_COLOR_RESET}m\e[${CHECK_COLOR_TEXT}m]\e[${CHECK_COLOR_STDERR}m\n$( echo "$CHECK_STDERR" | sed 's/^/      /' )\e[${CHECK_COLOR_RESET}m";
+    echo -e "    $(getColor CHECK_COLOR_TEXT)[$(getColor CHECK_COLOR_STDERR_HEADER)Standard Error$(getColor CHECK_COLOR_RESET)$(getColor CHECK_COLOR_TEXT)]$(getColor CHECK_COLOR_STDERR)\n$( echo "$CHECK_STDERR" | sed 's/^/      /' )$(getColor CHECK_COLOR_RESET)";
   };
   [ -n "${CHECK_LAST_COMMAND_INFO-}" ] && (( ${#CHECK_LAST_COMMAND_INFO[@]} > 0 )) && [ "$CHECK_SILENT" != true ] && (( CHECK_RESULT != 0 )) && {
-    echo -e "    \e[${CHECK_COLOR_TEXT}m[\e[${CHECK_COLOR_STACKTRACE_HEADER}mStacktrace\e[${CHECK_COLOR_RESET}m\e[${CHECK_COLOR_TEXT}m]\n      \e[${CHECK_COLOR_NEUTRAL}m${CHECK_LAST_COMMAND_INFO[0]}\e[${CHECK_COLOR_TEXT}m:\e[${CHECK_COLOR_NEUTRAL}m${CHECK_LAST_COMMAND_INFO[1]} ${CHECK_LAST_COMMAND_INFO[2]}\n\e[${CHECK_COLOR_CODE}m$( sed "${CHECK_LAST_COMMAND_INFO[1]}q;d" "${CHECK_LAST_COMMAND_INFO[0]}" | sed "s/^ *//g" | sed "s/^/      /" )\e[${CHECK_COLOR_RESET}m";
+    echo -e "    $(getColor CHECK_COLOR_TEXT)[$(getColor CHECK_COLOR_STACKTRACE_HEADER)Stacktrace$(getColor CHECK_COLOR_RESET)$(getColor CHECK_COLOR_TEXT)]\n      $(getColor CHECK_COLOR_NEUTRAL)${CHECK_LAST_COMMAND_INFO[0]}$(getColor CHECK_COLOR_TEXT):$(getColor CHECK_COLOR_NEUTRAL)${CHECK_LAST_COMMAND_INFO[1]} ${CHECK_LAST_COMMAND_INFO[2]}\n$(getColor CHECK_COLOR_CODE)$( sed "${CHECK_LAST_COMMAND_INFO[1]}q;d" "${CHECK_LAST_COMMAND_INFO[0]}" | sed "s/^ *//g" | sed "s/^/      /" )$(getColor CHECK_COLOR_RESET)";
   }; return 0
 }
 (( $# > 0 )) && { case "$1" in
@@ -36,7 +37,7 @@ CHECK_PASSED=0; CHECK_FAILED=0; CHECK_FILES=(); CHECK_DIRS=(); while (( $# > 0 )
 (( ${#CHECK_FILES[@]} == 0 )) && { while read -rd '' CHECK_FILE; do echo "$CHECK_FILE" | grep "${CHECK_FILE_PATTERN:-.test.sh$\|.spec.sh$}" &>/dev/null && CHECK_FILES+=("$CHECK_FILE"); done < <( find . -type f -name "*${CHECK_FILE_EXT:-.sh}" -print0 ); }
 for CHECK_FILE in "${CHECK_FILES[@]}"; do
   CHECK_TESTS="$( "$0" --list "$CHECK_FILE" )" || { echo "Failed to find tests in file: '$CHECK_FILE'" >&2; exit 1; }
-  [ "$CHECK_SILENT" != true ] && echo -e "\e[${CHECK_COLOR_TEXT}m[\e[${CHECK_COLOR_FILENAME}m$CHECK_FILE\e[${CHECK_COLOR_RESET}m\e[${CHECK_COLOR_TEXT}m]"; for CHECK_TEST in $CHECK_TESTS; do runAndDisplayOutput; done; [ "$CHECK_SILENT" != true ] && echo;
+  [ "$CHECK_SILENT" != true ] && echo -e "$(getColor CHECK_COLOR_TEXT)[$(getColor CHECK_COLOR_FILENAME)$CHECK_FILE$(getColor CHECK_COLOR_RESET)$(getColor CHECK_COLOR_TEXT)]"; for CHECK_TEST in $CHECK_TESTS; do runAndDisplayOutput; done; [ "$CHECK_SILENT" != true ] && echo;
 done
-CHECK_RESULT="\e[${CHECK_COLOR_RESET}m"; (( CHECK_FAILED > 0 )) && { CHECK_RESULT="\e[${CHECK_COLOR_FAIL_RESULT}m$CHECK_FAILED Test(s) Failed"; (( CHECK_PASSED > 0 )) && CHECK_RESULT+=", $CHECK_PASSED Test(s) Passed\e[${CHECK_COLOR_RESET}m" || CHECK_RESULT+="\e[${CHECK_COLOR_RESET}m"; }
-(( CHECK_FAILED == 0 )) && { [ "$CHECK_SILENT" != true ] && echo -e "\e[${CHECK_COLOR_PASS_RESULT}m$CHECK_PASSED Test(s) Passed\e[${CHECK_COLOR_RESET}m"; exit 0; } || { [ "$CHECK_SILENT" != true ] && echo -e "$CHECK_RESULT" >&2; exit 1; }
+CHECK_RESULT="$(getColor CHECK_COLOR_RESET)"; (( CHECK_FAILED > 0 )) && { CHECK_RESULT="$(getColor CHECK_COLOR_FAIL_RESULT)$CHECK_FAILED Test(s) Failed"; (( CHECK_PASSED > 0 )) && CHECK_RESULT+=", $CHECK_PASSED Test(s) Passed$(getColor CHECK_COLOR_RESET)" || CHECK_RESULT+="$(getColor CHECK_COLOR_RESET)"; }
+(( CHECK_FAILED == 0 )) && { [ "$CHECK_SILENT" != true ] && echo -e "$(getColor CHECK_COLOR_PASS_RESULT)$CHECK_PASSED Test(s) Passed$(getColor CHECK_COLOR_RESET)"; exit 0; } || { [ "$CHECK_SILENT" != true ] && echo -e "$CHECK_RESULT" >&2; exit 1; }
