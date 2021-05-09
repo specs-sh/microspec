@@ -15,6 +15,14 @@ sidebar:
     url: "#"
   - title: '<i class="fad fa-pencil"></i> Write test'
     url: "#"
+  - title: '<i class="far fa-running"></i> Run test'
+    url: "#"
+  - title: '<i class="fad fa-language"></i> Test syntax'
+    url: "#"
+  - title: '<i class="fad fa-volcano"></i> About <code>set -e</code>'
+    url: "#"
+  - title: '<i class="fad fa-arrows-v"></i> Setup and Teardown'
+    url: "#"
 
 - title: '<i class="fad fa-terminal"></i> Options'
   url: "#"
@@ -49,84 +57,11 @@ sidebar:
 - title: '<i class="fad fa-cog"></i> Customization'
   url: "#installation"
   children:
-  - title: '<i class="fad fa-feather-alt"></i> Custom Test Syntax'
+  - title: '<i class="fad fa-feather-alt"></i> Customize Test Syntax'
     url: "#"
-  - title: '<i class="fad fa-palette"></i> Custom Colors'
+  - title: '<i class="fad fa-fish"></i> Test Hooks'
     url: "#"
-  - title: '<i class="fad fa-print"></i> Custom Formatters'
+  - title: '<i class="fad fa-print"></i> Write Formatters'
     url: "#"
-
-sidebar_2:
-- title: '<i class="fad fa-cog"></i> Installation'
-  url: "#installation"
-  children:
-  - title: '<i class="fas fa-cog"></i> Use Install Script'
-    url: "#"
-  - title: '<i class="fas fa-cogs"></i> Manual Installation'
-    url: "#"
-
-- title: '<i class="fad fa-graduation-cap"></i> Basics'
-  url: "#"
-  children:
-  - title: '<i class="fad fa-code"></i> Use with scripts'
-    url: "#"
-  - title: '<i class="fas fa-function"></i> Use with functions'
-    url: "#"
-  - title: '<i class="fad fa-dollar-sign"></i> Setting Variables'
-    url: "#"
-  - title: '<i class="fad fa-quote-right"></i> Printing to STDOUT'
-    url: "#"
-
-- title: '<i class="fad fa-brackets-curly"></i> Arguments'
-  url: "#"
-  children:
-  - title: '<i class="fad fa-terminal"></i> <code>getargs {varname}</code>'
-    url: "#"
-  - title: '<i class="fad fa-ellipsis-h-alt"></i> List Arguments <code>{items...}</code>'
-    url: "#"
-  - title: '<i class="fal fa-question"></i> Optional Arguments <code>{varname?}</code>'
-    url: "#"
-
-- title: '<i class="fad fa-value-absolute"></i> Options'
-  url: "#"
-  children:
-  - title: '<i class="fad fa-terminal"></i> <code>getargs -o/--option {varname}</code>'
-    url: "#"
-  - title: '↳ Shorthand: <code>-o/--{varname}</code>'
-    url: "#"
-
-- title: '<i class="fad fa-pennant"></i> Flags'
-  url: "#"
-  children:
-  - title: '<i class="fad fa-terminal"></i> <code>getargs +f/-flag {varname}</code>'
-    url: "#"
-  - title: '↳ Shorthand: <code>+f/-{varname}</code>'
-    url: "#"
-
-- title: '<i class="fad fa-check-double"></i> Validation'
-  url: "#"
-  children:
-  - title: '<i class="fas fa-divide"></i> Parsing Numbers'
-    url: "#"
-  - title: '<i class="fad fa-check"></i> Parsing Booleans'
-    url: "#"
-  - title: '<i class="fas fa-tilde"></i> Parsing Patterns'
-    url: "#"
-  - title: '<i class="fad fa-brackets"></i> Custom Validation'
-    url: "#"
-
-- title: '<i class="fad fa-tools"></i> Configuration'
-  url: "/docs/config"
-  children:
-  - title: '<i class="fad fa-wrench"></i> Configure Features using <code>GETARGS=+-</code>'
-    url: "#"
-  - title: '<i class="fad fa-comment-lines"></i> Useful Error Messages <code>GETARGS_ERROR</code>'
-    url: "#"
-
-- title: '<i class="fad fa-tachometer-alt-fast"></i> Performance'
-  url: "#performance"
-  children:
-  - title: '<i class="fad fa-chart-bar"></i> Parse Times (<code>0.2ms - 2ms</code>)'
-    url: "#"
-  - title: '<i class="fal fa-tachometer-alt-fast"></i> Optimizing Performance'
+  - title: '<i class="fad fa-palette"></i> Customize Colors'
     url: "#"

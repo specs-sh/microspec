@@ -24,6 +24,11 @@ INSTALL_MESSAGE="Installed ☑️ check
 
     ./check myTest.test.sh
 
+⚙️ Add to PATH:
+
+  Consider adding the check executable to a folder
+  and adding it to your PATH (to run from anywhere)
+
 📖 Visit https://check.shellbox.sh for documentation
 "
 ########################
