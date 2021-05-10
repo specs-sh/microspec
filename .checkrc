@@ -1,8 +1,0 @@
-COLORS=(33 34 35 36 35 34)
-COLOR_INDEX=0
-
-beforeTest() {
-  export CHECK_COLOR_TESTNAME="${COLORS[$COLOR_INDEX]}"
-  (( COLOR_INDEX++ ))
-  (( COLOR_INDEX == ${#COLORS[@]} )) && COLOR_INDEX=0
-}
