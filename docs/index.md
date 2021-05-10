@@ -4,7 +4,7 @@ title: ""
 
 # `$ microspec`
 
-> _The smallest, TAP-compliant, Mac-compatible, Bash test framework! (30 LOC) (2.79KB)_
+> _The smallest, TAP-compliant, Mac-compatible, Bash test framework! (30 LOC) (2.7KB)_
 
 ---
 
