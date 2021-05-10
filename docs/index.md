@@ -133,7 +133,7 @@ testSomething() { # <--- could alternatively be named 'specSomething' etc
 
 ## <i class="fab fa-apple"></i> Mac OS X Support
 
-Mac OS uses a _very old_ version of Bash: `Bash 3.5.57` (_release in 2006_)
+Mac OS uses a _very old_ version of Bash: `Bash 3.5.57` (_released in 2006_)
 
 `microspec` was _specifically_ authored to make sure this old version was supported.
 
