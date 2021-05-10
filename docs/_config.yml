@@ -19,7 +19,6 @@ defaults:
     values:
       layout: default
 
-# Build settings
 markdown: kramdown
 
 # Exclude from processing.
