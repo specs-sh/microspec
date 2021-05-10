@@ -1,0 +1,29 @@
+#! /usr/bin/env bash
+[ "$1" = --list ] && [ -f "$2" ] && { source "$2"; if declare -pF | awk '{print $3}' | grep -i '^test\|^spec' 2>/dev/null; then exit 0; else exit $?; fi; }
+runAll() { if [ -z "${1:-}" ]; then return 0; fi; if __spec__functions="$( declare -pF | awk '{print $3}' | grep -i "$1" 2>/dev/null )"; then for __spec__fn in $__spec__functions; do $__spec__fn; done; fi; }
+recordCmd() { spec_return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ]; then if [ -z "$__spec__testDone" ]; then CMD_INFO=("${@:1}"); fi; fi; return $spec_return; }
+[ "$1" = --run ] && [ -f "$2" ] && [ -n "$3" ] && { source "$2"; set -eET; trap : ERR
+  trap 'CMD_INFO[0]=$?; __spec__testDone=true; runAll "^teardown\|^after"; declare -p CMD_INFO' EXIT
+  trap 'shopt -qo nounset && __spec__nounset=true || __spec__nounset=""; set +u; recordCmd $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}" "$BASH_COMMAND"; [ -n "$__spec__nounset" ] && set +u;' DEBUG
+  trap 'recordCmd $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}" "$BASH_COMMAND";' DEBUG; runAll "^setup\|^before"; "$3"; exit $?; }
+for SPEC_FILE; do echo -e "[\e[36m$SPEC_FILE\e[0m]"; declare -i PASSED=0; declare -i FAILED=0
+  if [ -f "$SPEC_FILE" ]; then
+    for SPEC_TEST in $("$0" --list "$SPEC_FILE" 2>/dev/null); do
+      SPEC_TEST_OUTPUT="$({ STDERR="$({ STDOUT="$( "$0" --run "$SPEC_FILE" "$SPEC_TEST" )"; } 2>&1; declare -i EXITCODE=$?; declare -p STDOUT >&2; declare -p EXITCODE >&2; exit $EXITCODE;)"; declare -p STDERR; exit 0; } 2>&1 )"
+      eval "$SPEC_TEST_OUTPUT";
+      [[ "$STDOUT" =~ .*(declare[[:space:]]-a[[:space:]]CMD_INFO=[\']?\(.*)$ ]] && __spec_lastCmdText__="${BASH_REMATCH[1]}"
+      [ -n "$__spec_lastCmdText__" ] && { eval "$__spec_lastCmdText__"; STDOUT="${STDOUT%"$__spec_lastCmdText__"}"; STDOUT="${STDOUT%$'\n'}"; }
+      (( EXITCODE == 0 )) && { (( PASSED++ )); echo -e "  [\e[32mPASS\e[0m] $SPEC_TEST"; } || { (( FAILED++ )); echo -e "  [\e[31mFAIL\e[0m] $SPEC_TEST"; }
+      (( EXITCODE != 0 )) || [ "$VERBOSE" = true ] && {
+        [ -n "$STDOUT" ] && { echo -e "    [\e[34mStandard Output\e[0m]"; echo -e "\e[39;2m$( echo -e "$STDOUT" | sed 's/^/      /' )\e[0m"; }
+        [ -n "$STDERR" ] && { echo -e "    [\e[31mStandard Error\e[0m]"; echo -e "\e[39;2m$( echo -e "$STDERR" | sed 's/^/      /' )\e[0m"; }
+        (( ${#CMD_INFO[@]} > 2 )) && { (( EXITCODE != 0 )) || [ "$STACKTRACE" = true ]; } && {
+          echo -e "    [\e[33mStacktrace\e[0m]"; echo -e "      \e[34m${CMD_INFO[1]}\e[0m:\e[34m${CMD_INFO[2]} ${CMD_INFO[3]}";
+          [ -f "${CMD_INFO[1]}" ] && echo -e "\e[33;2m$( sed "${CMD_INFO[2]}q;d" "${CMD_INFO[1]}" | sed "s/^ *//g" | sed "s/^/        /" )\e[0m";
+        }
+      }
+    done
+  fi
+  (( FAILED > 0 )) && echo -e "\e[31;1m" || echo -e "\e[32m"; echo -e "$PASSED Passed, $FAILED Failed"; printf '\e[0m%s' ''
+  (( FAILED > 0 )) && exit 1 || exit 0
+done
