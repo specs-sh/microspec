@@ -183,4 +183,4 @@ $ check myFirstTest.test.sh -v
 2 Test(s) Passed
 ```
 
-[📖 Read Official Documentation](https://check.specs.sh) @ [check.specs.sh](https://check.specs.sh)
+## [📖 Read Official Documentation](https://check.specs.sh) @ [check.specs.sh](https://check.specs.sh)
