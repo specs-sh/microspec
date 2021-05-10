@@ -1,0 +1,36 @@
+title: microspec
+description: Micro Shell Scripting Test Framework 
+theme: jekyll-theme-hacker
+# theme: jekyll-theme-merlot
+show_downloads: true
+twitter_username: rebeccca_taylor
+github_username: beccasaurus
+
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site, e.g. http://example.com
+
+github:
+  zip_url: https://github.com/specs-sh/microspec/archive/v1.2.0.zip
+  tar_url: https://github.com/specs-sh/microspec/archive/v1.2.0.tar.gz
+  owner_url: https://github.com/beccasaurus
+  owner_name: "@beccasaurus"
+
+defaults:
+  -
+    values:
+      layout: default
+
+# Build settings
+markdown: kramdown
+
+# Exclude from processing.
+# The following items will not be processed, by default. Create a custom list
+# to override the default setting.
+# exclude:
+#   - Gemfile
+#   - Gemfile.lock
+#   - node_modules
+#   - vendor/bundle/
+#   - vendor/cache/
+#   - vendor/gems/
+#   - vendor/ruby/
