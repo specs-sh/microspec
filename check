@@ -1,4 +1,6 @@
 #! /usr/bin/env bash
+# TODO use runAll for hooks and rewrite hooks to _START WITH_ rather than be exact functio names
+# TODO load helper files walking up the file system from / to folder
 shopt | grep compat32 &>/dev/null && shopt -s compat32; CHECK_VERSION="1.2.0"
 CHECK_SET_OPTS="${CHECK_SET_OPTS:-eET}" CHECK_FORMATTER="${CHECK_FORMATTER:-}"; CHECK_CONFIG="${CHECK_CONFIG:-.checkrc}" CHECK_FILE_PATTERN="${CHECK_FILE_PATTERN:-.test.sh$\|.spec.sh$}" CHECK_HELPER_PATTERN="${CHECK_HELPER_PATTERN:-testHelper.sh\|specHelper.sh}" CHECK_RANDOM="${CHECK_RANDOM:-shuf}" CHECK_SETUP_PATTERN="${CHECK_SETUP_PATTERN:-^setup\|^before}" CHECK_TEARDOWN_PATTERN="${CHECK_TEARDOWN_PATTERN:-^teardown\|^after}" CHECK_STACKTRACE="${CHECK_STACKTRACE:-}" CHECK_COLOR="${CHECK_COLOR:-true}" CHECK_SILENT="${CHECK_SILENT:-}" CHECK_VERBOSE="${VERBOSE:-}" CHECK_FILTER="${CHECK_FILTER:-}" CHECK_COLOR_TEXT="${CHECK_COLOR_TEXT:-39}" CHECK_COLOR_FAIL="${CHECK_COLOR_FAIL:-31}" CHECK_COLOR_FAIL_RESULT="${CHECK_COLOR_FAIL_RESULT:-31;1}" CHECK_COLOR_PASS="${CHECK_COLOR_PASS:-32}" CHECK_COLOR_PASS_RESULT="${CHECK_COLOR_PASS_RESULT:-32;1}" CHECK_COLOR_STACKTRACE_LINE="${CHECK_COLOR_STACKTRACE_LINE:-34}" CHECK_COLOR_STACKTRACE_CODE="${CHECK_COLOR_STACKTRACE_CODE:-33}" CHECK_COLOR_RESET="${CHECK_COLOR_RESET:-0}" CHECK_COLOR_STDOUT="${CHECK_COLOR_STDOUT:-39;2}" CHECK_COLOR_STDOUT_HEADER="${CHECK_COLOR_STDOUT_HEADER:-34;1}" CHECK_COLOR_STDERR="${CHECK_COLOR_STDERR:-39;2}" CHECK_COLOR_STDERR_HEADER="${CHECK_COLOR_STDERR_HEADER:-31;1}" CHECK_COLOR_STACKTRACE_HEADER="${CHECK_COLOR_STACKTRACE_HEADER:-33;1}" CHECK_COLOR_FILENAME="${CHECK_COLOR_FILENAME:-34}" CHECK_COLOR_TESTNAME="${CHECK_COLOR_TESTNAME:-39}"
 recordCommands() { __check__return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ]; then if [ -z "$CHECK_TEST_DONE" ]; then CHECK_LAST_COMMAND_INFO=("${@:1}"); fi; fi; return $__check__return; }
@@ -9,7 +11,7 @@ runTest() {
   trap 'recordCommands $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}" "$BASH_COMMAND";' DEBUG; trap : ERR
   runAll "$CHECK_SETUP_PATTERN"; $CHECK_TEST; CHECK_RESULT=$?; exit $CHECK_RESULT;
 }; getColor() { [ "$CHECK_COLOR" = true ] && printf '\e[0m\e[%sm' "${!1}"; return 0; }
-runAll() { if [ -z "${1:-}" ]; then return 0; fi; if CHECK_FUNCTIONS="$( declare -pF | awk '{print $3}' | grep -i "$1" 2>/dev/null )"; then for CHECK_FUNCTION in $CHECK_FUNCTIONS; do $CHECK_FUNCTION; done; fi; }
+runAll() { if [ -z "${1:-}" ]; then return 0; fi; if __check__functions="$( declare -pF | awk '{print $3}' | grep -i "$1" 2>/dev/null )"; then for __check__function in $__check__functions; do $__check__function; done; fi; }
 runAndDisplayOutput() {
   [ -n "$CHECK_FILTER" ] && { echo "$CHECK_TEST" | grep -i "$CHECK_FILTER" &>/dev/null || return 0; }
   CHECK_TEST_OUTPUT="$({ __check__STDERR="$({ __check__STDOUT="$( CHECK_SET_OPTS="$CHECK_SET_OPTS" "$0" --private-run "$CHECK_FILE" "$CHECK_TEST" )"; } 2>&1; declare -i CHECK_RESULT=$?; declare -p __check__STDOUT >&2; declare -p CHECK_RESULT >&2; exit $CHECK_RESULT;)"; declare -p __check__STDERR; exit 0; } 2>&1 )"
