@@ -19,26 +19,38 @@ sidebar:
     url: "/docs#-run-test"
   - title: '<i class="fad fa-language"></i> Test syntax'
     url: "/docs#-test-syntax"
-  - title: '<i class="fad fa-volcano"></i> About <code>set -e</code>'
-    url: "/docs#-about-set--e"
   - title: '<i class="fad fa-arrows-v"></i> Setup and Teardown'
     url: "/docs#-setup-and-teardown"
+  - title: '<i class="fad fa-volcano"></i> About <code>set -e</code>'
+    url: "/docs#-about-set--e"
 
-- title: '<i class="fad fa-terminal"></i> Options'
+- title: '<i class="fad fa-heart"></i> Related Projects'
+  url: "/docs#-related-projects"
+  children:
+  - title: '<i class="fad fa-terminal"></i> <code>run</code>'
+    url: "/docs#-run"
+  - title: '<i class="fad fa-vial"></i> <code>assert</code>'
+    url: "/docs#-assert"
+  - title: '<i class="fad fa-flask"></i> <code>expect</code>'
+    url: "/docs#-assert"
+
+- title: '<i class="fad fa-cog"></i> Options'
   url: "/docs#-options"
   children:
   - title: '<code>&lt;file&gt; &lt;directory&gt;</code>'
     url: "/docs#ltfilegt-ltdirectorygt"
+  - title: '<code>-f / --filter</code>'
+    url: "/docs#-f----filter"
   - title: '<code>-v / --verbose</code>'
     url: "/docs#-v----verbose"
   - title: '<code>-q / --quiet</code>'
     url: "/docs#-q----quiet"
-  - title: '<code>-f / --filter</code>'
-    url: "/docs#-f----filter"
   - title: '<code>-c / --config</code>'
     url: "/docs#-c----config"
-  - title: '<code>-s / --set / --no-set</code>'
-    url: "/docs#-s----set----no-set"
+  - title: '<code>-s / --set</code>'
+    url: "/docs#-s----set"
+  - title: '<code>--no-set / --no-set-e</code>'
+    url: "/docs#--no-set----no-set-e"
   - title: '<code>--color / --no-color</code>'
     url: "/docs#--color----no-color"
   - title: '<code>--random / --no-random</code>'
@@ -54,7 +66,7 @@ sidebar:
   - title: '<code>--teardown-pattern</code>'
     url: "/docs#--teardown-pattern"
 
-- title: '<i class="fad fa-cog"></i> Customization'
+- title: '<i class="fad fa-cogs"></i> Customization'
   url: "/docs#-customization"
   children:
   - title: '<i class="fad fa-feather-alt"></i> Customize Test Syntax'

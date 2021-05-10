@@ -88,3 +88,7 @@ $ check [options] [files or folders containing test files]
 > Just sounded like an interesting challenge.  
 > The executable is also under 10K which was my initial goal.  
 > The 49 LOC are pretty tightly squished, but - _meh_ - it was fun!
+
+---
+
+<a href="/docs"><i class="fad fa-books"></i> Read the Documentation</a>
