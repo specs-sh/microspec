@@ -75,6 +75,14 @@ $ check [options] [files or folders containing test files]
 
 ## Getting Started
 
+### Install
+
+```sh
+curl -o- https://check.shellbox.sh/install.sh | bash
+```
+
+> or download the [latest release](https://github.com/specs-sh/check/releases)
+
 ### ✏️ Write Test
 
 #### `myFirstTest.test.sh`
