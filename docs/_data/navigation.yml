@@ -24,15 +24,15 @@ sidebar:
   - title: '<i class="fad fa-volcano"></i> About <code>set -e</code>'
     url: "/docs#-about-set--e"
 
-- title: '<i class="fad fa-heart"></i> Related Projects'
-  url: "/docs#-related-projects"
-  children:
-  - title: '<i class="fad fa-terminal"></i> <code>run</code>'
-    url: "/docs#-run"
-  - title: '<i class="fad fa-vial"></i> <code>assert</code>'
-    url: "/docs#-assert"
-  - title: '<i class="fad fa-flask"></i> <code>expect</code>'
-    url: "/docs#-assert"
+# - title: '<i class="fad fa-heart"></i> Related Projects'
+#   url: "/docs#-related-projects"
+#   children:
+#   - title: '<i class="fad fa-terminal"></i> <code>run</code>'
+#     url: "/docs#-run"
+#   - title: '<i class="fad fa-vial"></i> <code>assert</code>'
+#     url: "/docs#-assert"
+#   - title: '<i class="fad fa-flask"></i> <code>expect</code>'
+#     url: "/docs#-assert"
 
 - title: '<i class="fad fa-cog"></i> Options'
   url: "/docs#-options"
@@ -49,6 +49,8 @@ sidebar:
     url: "/docs#-c----config"
   - title: '<code>-s / --set</code>'
     url: "/docs#-s----set"
+  - title: '<code>-l / --list</code>'
+    url: "/docs#-l----list"
   - title: '<code>--no-set / --no-set-e</code>'
     url: "/docs#--no-set----no-set-e"
   - title: '<code>--color / --no-color</code>'
@@ -73,7 +75,7 @@ sidebar:
     url: "/docs#-customize-test-syntax"
   - title: '<i class="fad fa-fish"></i> Test Hooks'
     url: "/docs#-test-hooks"
-  - title: '<i class="fad fa-print"></i> Write Formatters'
-    url: "/docs#-write-formatters"
+  - title: '<i class="fad fa-print"></i> Write Formatter'
+    url: "/docs#-write-formatter"
   - title: '<i class="fad fa-palette"></i> Customize Colors'
     url: "/docs#-customize-colors"

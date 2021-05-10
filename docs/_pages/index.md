@@ -81,13 +81,15 @@ $ check [options] [files or folders containing test files]
 ### Why?
 
 > I wanted a tiny testing utility which I could easily include in each repository  
-> (_rather than a tool like BATS which is not distributed as a single executable_)
+> ( _rather than a tool like BATS which is not distributed as a single executable_ )
 
 #### Why under 50 LOC?
 
 > Just sounded like an interesting challenge.  
 > The executable is also under 10K which was my initial goal.  
 > The 49 LOC are pretty tightly squished, but - _meh_ - it was fun!
+
+_I hope you enjoy it!_ &nbsp;~ [`@beccasaurus`](https://github.com/beccasaurus)
 
 ---
 

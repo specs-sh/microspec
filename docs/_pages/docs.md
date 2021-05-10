@@ -270,11 +270,10 @@ Without this feature enabled, tests will fail in one of these cases:
 
 ---
 
-# <i class="fad fa-heart"></i> Related Projects
-
+<!-- # <i class="fad fa-heart"></i> Related Projects
 ## <i class="fad fa-terminal"></i> <code>run</code>
 ## <i class="fad fa-vial"></i> <code>assert</code>
-## <i class="fad fa-flask"></i> <code>expect</code>
+## <i class="fad fa-flask"></i> <code>expect</code> -->
 
 # <i class="fad fa-terminal"></i> Options
 
@@ -341,9 +340,9 @@ They can be used to set variables, e.g. instead of passing `--xxx` options.
 
 ```
 # .checkrc
-CHECK_COLOR=false
-CHECK_FILE_PATTERN='.verify.sh$'
-CHECK_TEST_PATTERN='^verify'
+export CHECK_COLOR=false
+export CHECK_FILE_PATTERN='.verify.sh$'
+export CHECK_TEST_PATTERN='^verify'
 ```
 
 > You can alternatively set `CHECK_CONFIG="path/to/config.sh"`
@@ -369,6 +368,19 @@ check --set "eETuo pipefail" myTest.test.sh
 > Note: if you do not provide `e` tests will not fail when any statement fails.
 
 > You can alternatively set `CHECK_SET_OPTS="eETuo pipefail"`
+
+## <code>-l / --list</code>
+
+List all of the test functions in the provided file:
+
+```sh
+check myTest.test.sh
+testOne
+testTwo
+```
+
+> Note: this utility function is only available for _test names and_
+> there is not currently a command to print _setup_ or _teardown_ functions.
 
 ## <code>--no-set / --no-set-e</code>
 
@@ -412,7 +424,9 @@ To disable this, run:
 check --no-random myTest.test.sh
 ```
 
-> You can alternatively set `CHECK_RANDOM=true` or `CHECK_RANDOM=false`
+> You can alternatively set `CHECK_RANDOM="command"` used to randomize text.  
+> To disable random using a variable, set `CHECK_RANDOM="grep ."`  
+> Defaults to `CHECK_RANDOM=shuf`. The command is piped to, e.g. `... | shuf`
 
 ## <code>--formatter</code>
 
@@ -430,7 +444,7 @@ See <a href="#-writing-formatters"><i class="fad fa-print"></i> Write Formatters
 
 By default, `check` searches for `*.test.sh` and `*.spec.sh` files in directories.
 
-This can be easily overridden using the `--file-pattern` option:
+This can be easily customized using the `--file-pattern` option:
 
 ```sh
 check --file-pattern verify.sh    # Run any files containing 'verify.sh'
@@ -445,7 +459,7 @@ check --file-pattern 'verify.sh$' # Run any files ending with 'verify.sh'
 
 By default, test functions must start with `test`, `@test`, `spec`, or `@spec`
 
-This can be easily overriden using the `--test-pattern` option:
+This can be easily customized using the `--test-pattern` option:
 
 ```sh
 check --test-pattern "verify"  # Function names containing 'verify'
@@ -470,11 +484,336 @@ verifyFactTwo() {
 > Note: patterns are matched using `grep` and are not case-sensitive.
 
 ## <code>--setup-pattern</code>
+
+By default, setup functions must start with `setup` or `before`.
+
+This can be easily customized using the `--setup-pattern` option:
+
+```sh
+check --setup-pattern ^prepare # Function names starting with 'prepare'
+```
+
+Then you can write your tests using your custom setup syntax:
+
+```sh
+prepare() {
+  # Setup code goes here
+}
+
+testOne() {
+  # ...
+}
+```
+
+> You can alternatively set `CHECK_SETUP_PATTERN="pattern1\|pattern2"`
+
+> Note: patterns are matched using `grep` and are not case-sensitive.
+
 ## <code>--teardown-pattern</code>
+
+By default, teardown functions must start with `teardown` or `after`.
+
+This can be easily customized using the `--teardown-pattern` option:
+
+```sh
+check --teardown-pattern ^cleanup # Function names starting with 'cleanup'
+```
+
+Then you can write your tests using your custom teardown syntax:
+
+```sh
+cleanup() {
+  # Teardown code goes here
+}
+
+testOne() {
+  # ...
+}
+```
+
+> You can alternatively set `CHECK_TEARDOWN_PATTERN="pattern1\|pattern2"`
+
+> Note: patterns are matched using `grep` and are not case-sensitive.
 
 ---
 # <i class="fad fa-cog"></i> Customization
+
+This section covers various ways you can customize `check` to suit your own needs.
+
 ## <i class="fad fa-feather-alt"></i> Customize Test Syntax
+
+The test syntax can be customized using:
+
+| Option | Environment Variable | Description |
+|-|-|-|
+| [`--file-pattern`](#--file-pattern) | `CHECK_FILE_PATTERN` | _Configure filenames `check` searches for in directories._ |
+| [`--test-pattern`](#--test-pattern) | `CHECK_TEST_PATTERN` | _Customize which functions are run as tests_ |
+| [`--setup-pattern`](#--setup-pattern) | `CHECK_SETUP_PATTERN` | _Customize which functions are run before each test_ |
+| [`--teardown-pattern`](#--teardown-pattern) | `CHECK_TEARDOWN_PATTERN` | _Customize which functions are run after each test_ |
+
+You can combine these to create your own entirely custom testing experience.
+
+> 💡 **Tip:** configure these in a `.checkrc` to define your own syntax
+
+#### Example `.checkrc`
+
+```sh
+export CHECK_FILE_PATTERN='\.verify\.sh$' # Files ending with .verify.sh
+export CHECK_TEST_PATTERN='^verify'       # Functions starting with 'verify'
+export CHECK_SETUP_PATTERN='^prepare'     # Functions starting with 'prepare'
+export CHECK_TEARDOWN_PATTERN='^cleanup'  # Functions starting with 'cleanup'
+```
+
+With this `.checkrc` file in the directory you run tests from, the following test runs:
+
+```sh
+prepare() {
+  echo "Hello from before test"
+}
+cleanup() {
+  echo "Hello from after test"
+}
+verify.OneThing() {
+  echo "Verifying one thing..."
+  (( 1 == 1 )) # This one should pass
+}
+verify.SecondThing() {
+  echo "Verifying second thing..."
+  (( 1 == 0 )) # This one should fail
+}
+```
+
+```sh
+$ ./check
+
+[./myTest.verify.sh]
+  [FAIL] verify.SecondThing
+    [Standard Output]
+      Hello from before test
+      Verifying second thing...
+      Hello from after test
+    [Stacktrace]
+      ./myTest.verify.sh:13 verify.SecondThing
+        (( 1 == 0 )) # This one should fail
+  [PASS] verify.OneThing
+
+1 Test(s) Failed, 1 Test(s) Passed
+```
+
+#### Screenshot
+
+<img src="/assets/images/screenshot_customSyntaxOutput.png" style="max-height: 300px; border-radius: 2%; border: 1px solid; border-color: #666 !important;  padding: 10px; display: inline-block;">
+
 ## <i class="fad fa-fish"></i> Test Hooks
-## <i class="fad fa-print"></i> Write Formatters
+
+While `check` runs tests, it calls hook functions if they are defined:
+
+| Function Name | Description | Noteworthy Variables |
+|-|-|-|
+| `beforeSuite` | _Runs before the entire test suite_ | `CHECK_FILES` |
+| `beforeTestFile` | _Runs before each file is run_ | `CHECK_FILE` |
+| `beforeTest` | _Runs before each test is run_ | `CHECK_TEST` |
+| `afterTest` | _Runs after each test is run_ | `CHECK_RESULT` `CHECK_STDOUT` `CHECK_STDERR` |
+| `afterTestFile` | _Runs after each file is run_ | `CHECK_FILE` |
+| `afterSuite` | _Runs after entire test suite_ | `CHECK_PASSED` `CHECK_FAILED` |
+
+These functions can be defined in a provided config file or provided formatter.
+
+> Note: if both config _and_ formatter are provided and _both_ subscribe to hooks,
+> only hooks in formatter file will fire (_they'll override the config functions_).
+
+### Variables available to hooks
+
+| Variable | Description |
+|-|-|
+| `CHECK_FILES` | _Array of paths to provided or found test files_ |
+| `CHECK_FILE` | _Path to test file currently being run_ |
+| `CHECK_TEST` | _Name of test function currently being run_ |
+| `CHECK_STATUS` | _The value "PASS" or "FAIL"_ |
+| `CHECK_STDOUT` | _Contents of standard output from test function, if any_ |
+| `CHECK_STDERR` | _Contents of standard error from test function, if any_ |
+| `CHECK_LAST_COMMAND` | _The last command run in test (does not include teardown commands)_ |
+| `CHECK_LAST_EXITCODE` | _The exit code of the last command run in test_ |
+| `CHECK_LAST_FUNCNAME` | _The function the last command was run in, e.g. the test name_ |
+| `CHECK_LAST_SOURCE` | _The file the last command was run in, e.g. the test file_ |
+| `CHECK_LAST_LINENO` | _The line number of the last command that was run_ |
+| `CHECK_LAST_SOURCECODE` | _The source code of the last command per the `CHECK_LAST_SOURCE` and `CHECK_LAST_LINENO`_ |
+
+> See also: _Variables used for options, e.g. [`CHECK_COLOR`](#--color----no-color) and [`CHECK_VERBOSE`](#-v----verbose)_
+
+Noteworthy variables which your code may want to respect:
+
+| Variable | Description |
+|-|-|
+| `CHECK_VERBOSE` | _Verbose output, e.g. show STDOUT/STDERR for passing tests_ |
+| `CHECK_SILENT` | _The program should not output anything_ |
+
+## <i class="fad fa-print"></i> Write Formatter
+
+Formatters are written using [<i class="fad fa-fish"></i> Test Hooks](#-test-hooks)
+
+1. Create a source code file
+2. Define one or more of the following function names:
+  - `beforeSuite`
+  - `beforeTestFile`
+  - `beforeTest`
+  - `afterTest`
+  - `afterTestFile`
+  - `afterSuite`
+3. Call `check --formatter path/to/your/formatter.sh`
+
+When `check` is called with a formatter, _none_ of the default output is shown.
+
+Instead, it is your responsibility as a formatter to `echo` and `printf` beautiful things.
+
+### Example Formatter (TAP)
+
+Here is an example formatter which implements the [TAP specification](https://testanything.org/tap-specification.html):
+
+```sh
+# The TAP formatter only needs to use these two test hooks:
+# - beforeSuite
+# - afterTest
+
+declare -i TAP_TEST_NUMBER=0
+
+# Before the test suite runs, TAP tests are supposed to
+# print out the total number of tests that will be run.
+beforeSuite() {
+  [ "$CHECK_SILENT" = true ] && return 0 # <-- respects `check --quiet`
+  local -i testCount=0
+  local testFile
+  # Loop through all of the test files in the CHECK_FILES array:
+  for testFile in "${CHECK_FILES[@]}"; do
+    # Call `check --list FILE` which prints out the list of test functions and
+    # use `wc -l` to total up the number of lines to increment the test count:
+    local -i testFileTestCount="$( "$0" --list "$testFile" | wc -l )"
+    (( testCount = testCount + testFileTestCount ))
+  done
+  echo "1..$testCount" # <-- finally print the TAP "plan"
+}
+
+afterTest() {
+  [ "$CHECK_SILENT" = true ] && return 0  # <-- respects `check --quiet`
+  (( TAP_TEST_NUMBER = TAP_TEST_NUMBER + 1 ))
+  printTestLine
+  printStdout
+  printStderr
+  printStacktrace
+}
+
+# This prints the TAP "test line"
+printTestLine() {
+  case "$CHECK_STATUS" in
+    PASS) echo "ok $TAP_TEST_NUMBER - $CHECK_TEST" ;;
+    FAIL) echo "not ok $TAP_TEST_NUMBER - $CHECK_TEST" ;;
+  esac
+}
+
+# The functions below print TAP "diagnostics"
+#
+# If a test fails (or the user called `check --verbose`) then
+# the test's STDOUT and STDERR is printed out (if present)
+#
+# Additionally, the Stacktrace is printed for failed tests.
+printStdout() {
+  if [ -n "$CHECK_STDOUT" ] && [ "$CHECK_STATUS" = FAIL -o "$CHECK_VERBOSE" = true ]; then
+    echo "# Standard Output"
+    echo "$CHECK_STDOUT" | sed 's/^/#   /'
+  fi
+}
+printStderr() {
+  if [ -n "$CHECK_STDERR" ] && [ "$CHECK_STATUS" = FAIL -o "$CHECK_VERBOSE" = true ]; then
+    echo "# Standard Error"
+    echo "$CHECK_STDERR" | sed 's/^/#   /'
+  fi
+}
+printStacktrace() {
+  if [ -n "$CHECK_LAST_SOURCE" ] && [ "$CHECK_STATUS" = FAIL ]; then
+    echo "# Stacktrace"
+    echo "#   $CHECK_LAST_SOURCE:$CHECK_LAST_LINENO $CHECK_LAST_FUNCNAME"
+    [ -n "$CHECK_LAST_SOURCECODE" ] && echo "#     $CHECK_LAST_SOURCECODE"
+  fi
+}
+```
+
+> You can find the above file in the GitHub repository's `formatters/` folder.
+
+Put the above code into a file named `TAP.sh` and try running a test using:
+
+```sh
+check --formatter path/to/TAP.sh myTest.test.sh
+```
+
+#### Example Output
+
+```sh
+1..3
+ok 1 - test.runsMainExampleOK
+ok 2 - test.shouldPass
+not ok 3 - test.shouldFail
+# Standard Output
+#   Hello from setup.
+#   STDOUT from shouldFail
+#   Hello from teardown.
+# Standard Error
+#   STDERR from shouldFail
+# Stacktrace
+#   ./example.spec.sh:13 test.shouldFail
+#     (( 1 == 0 )) # <-- this fails so the test fails
+```
+
 ## <i class="fad fa-palette"></i> Customize Colors
+
+Finally! The last bit of the documentation is customizing colors 🎨
+
+There are three main ways to customize `check` color output:
+
+ 1. Pass `--no-color` to run with color disabled
+ 2. Implement your own [formatter](#-write-formatter) as [described above](#-write-formatter)
+ 3. _Configure a bunch of environment variables!_
+
+> [Here](https://misc.flogisoft.com/bash/tip_colors_and_formatting) is a quick reference for ANSI colors (_the color codes `check` uses_):  
+> [https://misc.flogisoft.com/bash/tip_colors_and_formatting](https://misc.flogisoft.com/bash/tip_colors_and_formatting)
+
+Here are all of the environment variables you can configure:
+
+| Variable | Default | Description |
+|-|-|-|
+| `CHECK_COLOR_TEXT` | `39` | _Used for all text not otherwise described below_ |
+| `CHECK_COLOR_FILENAME` | `34` | _Used to display the test file path_ |
+| `CHECK_COLOR_TESTNAME` | `39` | _Used to display the test file path_ |
+| `CHECK_COLOR_FAIL` | `31` | _Used to display 'FAIL'_ |
+| `CHECK_COLOR_FAIL_RESULT` | `31;1` | _Used to display final summary (if tests fail)_ |
+| `CHECK_COLOR_PASS` | `32` | _Used to display 'PASS'_ |
+| `CHECK_COLOR_PASS_RESULT` | `32;1` | _Used to display final summary (if tests pass)_ |
+| `CHECK_COLOR_STDOUT_HEADER` | `34;1` | _Used to display 'Standard Output'_ |
+| `CHECK_COLOR_STDOUT` | `39;2` | _Used to display the standard output text_ |
+| `CHECK_COLOR_STDERR_HEADER` | `31;1` | _Used to display 'Standard Error'_ |
+| `CHECK_COLOR_STDERR` | `39;2` | _Used to display the standard error text_ |
+| `CHECK_COLOR_STACKTRACE_HEADER` | `33;1` | _Used to display 'Stacktrace'_ |
+| `CHECK_COLOR_STACKTRACE_LINE` | `34` | _Used to display stacktrace file name, line number, and function name_ |
+| `CHECK_COLOR_STACKTRACE_CODE` | `33` | _Used to display the stacktrace line of source code_ |
+
+> I recommend you put these into your `.checkrc` (_don't forget to `export` them_)
+
+#### Want to change the colors _as the tests run?_
+
+Feel free to combine hooks with colors!
+
+##### Example `.checkrc`
+
+```sh
+COLORS=(33 34 35 36 35 34)
+COLOR_INDEX=0
+
+beforeTest() {
+  export CHECK_COLOR_TESTNAME="${COLORS[$COLOR_INDEX]}"
+  (( COLOR_INDEX++ ))
+  (( COLOR_INDEX == ${#COLORS[@]} )) && COLOR_INDEX=0
+}
+```
+
+##### Screenshot
+
+<img src="/assets/images/screenshot_rainbow.png" style="max-height: 300px; border-radius: 2%; border: 1px solid; border-color: #666 !important;  padding: 10px; display: inline-block;" />
