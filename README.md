@@ -125,6 +125,14 @@ testSomething() { # <--- could alternatively be named 'specSomething' etc
 
 > ℹ️ **Note:** _Teardown functions are run even if the test fails._
 
+## Viewing `STDOUT` and `STDERR`
+
+By default, Standard Output and Standard Error are only shown for failing tests.
+
+Run `VERBOSE=true ./microspec example.spec.sh` to view `STDOUT` and `STDERR` for passing tests.
+
+> ℹ️ **Note:** _View the final passing command of passing tests by setting `STACKTRACE=true`_
+
 ## <i class="fab fa-apple"></i> Mac OS X Support
 
 Mac OS uses a _very old_ version of Bash: `Bash 3.5.57` (_released in 2006_)
