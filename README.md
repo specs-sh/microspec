@@ -35,7 +35,7 @@ test.shouldFail() {
 
 ## 🏃🏿‍♀️ Run
 
-<img src="/assets/images/screenshot_microspec_dark.png" style="max-height: 350px;" />
+<img src="docs/assets/images/screenshot_microspec_dark.png" height=350 />
 
 ## 🏃🏿‍♀️ Run (TAP)
 
