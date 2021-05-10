@@ -7,7 +7,7 @@ PROJECT_NAME="microspec"
 FILE_WITH_VERSION_VARIABLE="microspec"
 VERSION_VARIABLE="MICROSPEC_VERSION"
 API_LATEST_RELEASE_INFO_URL="https://api.github.com/repos/$REPO_ORG/$PROJECT_NAME/releases/latest"
-FILES_TO_COPY=("microspec", "microtap", "example.spec.sh")
+FILES_TO_COPY=("microspec" "microtap" "example.spec.sh")
 INSTALL_MESSAGE="Installed 🧫 microspec
 
 Files:
