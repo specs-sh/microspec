@@ -1,10 +1,8 @@
-#! /usr/bin/env bash
+COLORS=(33 34 35 36 35 34)
+COLOR_INDEX=0
 
-# CHECK_COLOR_CODE=35
-
-# beforeSuite()    { echo "BEFORE SUITE"; }
-# beforeTestFile() { echo "BEFORE TEST FILE ($CHECK_FILE)"; }
-# beforeTest()     { echo "BEFORE TEST ($CHECK_TEST)"; }
-# afterTest()      { echo "AFTER TEST ($CHECK_TEST) ($CHECK_LAST_EXITCODE) [$CHECK_LAST_COMMAND] $(declare -p | grep CHECK_LAST)"; }
-# afterTestFile()  { echo "AFTER TEST FILE ($CHECK_FILE)"; }
-# afterSuite()     { echo "AFTER SUITE $CHECK_PASSED Passed $CHECK_FAILED Failed"; }
+beforeTest() {
+  export CHECK_COLOR_TESTNAME="${COLORS[$COLOR_INDEX]}"
+  (( COLOR_INDEX++ ))
+  (( COLOR_INDEX == ${#COLORS[@]} )) && COLOR_INDEX=0
+}

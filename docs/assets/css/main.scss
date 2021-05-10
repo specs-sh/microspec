@@ -1,0 +1,307 @@
+---
+---
+
+@charset "utf-8";
+
+@import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
+@import 'minimal-mistakes'; // main partials
+
+html div#main article.page section.page__content a {
+  text-decoration: none;
+}
+
+a:visited, html div#main article.page section.page__content a:visited, html div#main article.page section.page__content a:visited em, html div#main article.page section.page__content table a:visited, html div#main article.page section.page__content table a em {
+  color: white;
+}
+
+// html div#main article.page h2 {
+//   color:rgb(60, 72, 94);
+// }
+
+.nav__sub-title {
+  text-transform: none;
+}
+
+.page__footer-copyright a {
+  color: white;
+}
+
+div#footer ul.social-icons a {
+  color: white;
+}
+
+blockquote {
+  font-style: normal;
+}
+
+// html body div#footer.page__footer {
+//   background-color:rgb(60, 72, 94);
+// }
+
+// html body blockquote {
+//   border-left-color:rgb(60, 72, 94);
+// }
+
+html div#main div.grid__item h2 a {
+  text-decoration: none;
+}
+
+// div#main div.sidebar nav.nav__list li em {
+//   opacity: 85%;
+//   font-weight: normal;
+//   // font-size: 0.9em;
+// }
+
+// div#main div.sidebar nav.nav__list li i {
+//   opacity: 65%;
+//   font-style: normal;
+// }
+
+// div#main div.sidebar nav.nav__list li strong {
+//   // font-size: 1.1em;
+// }
+
+div#main a.reading-navigation {
+  opacity: 75%;
+}
+
+div.sidebar .author__avatar a img {
+  border: none;
+}
+
+/*
+GS: override any CSS with new CSS styles AFTER the `@import "minimal-mistakes";` line just above!
+See: https://github.com/mmistakes/minimal-mistakes/issues/1219#issuecomment-326809412
+Anything you place after this point will therefore "cascade and override" the previous CSS styles.
+*/
+
+/*
+GS: Decrease font sizes of the entire website.
+Defaults for small, medium, large, and x-large screens are:
+16, 18, 20, and 22px, in that order. All other font sizes are "em"
+[typography unit](https://en.wikipedia.org/wiki/Em_(typography)) multipliers of these pixel
+(px) values, and are therefore relative to and changed by these singular pixel values.
+See: https://github.com/mmistakes/minimal-mistakes/issues/1219#issuecomment-326809412
+- It looks like the screen pixel sizes to move into each new "size" category are defined in
+  the "Breakpoints" section of "_variables.scss"?
+*/
+html {
+  .archive__item-teaser img {
+    width: auto;
+  }
+
+  font-size: 18px; // change to whatever
+
+  @include breakpoint($small) {
+    font-size: 16px; // change to whatever
+  }
+
+  @include breakpoint($medium) {
+    font-size: 16px; // change to whatever
+  }
+
+  @include breakpoint($large) {
+    font-size: 18px; // change to whatever
+  }
+
+  @include breakpoint($x-large) {
+    font-size: 18px; // change to whatever
+  }
+
+  div#main div.sidebar .author__content .author__bio p {
+    font-style: italic;
+
+    // @include breakpoint($small) {
+    //   font-size: 20px; // change to whatever
+    // }
+
+    // @include breakpoint($medium) {
+    //   font-size: 24px; // change to whatever
+    // }
+
+    @include breakpoint($large) {
+      font-size: 16px; // change to whatever
+    }
+
+    // @include breakpoint($x-large) {
+    //   font-size: 28px; // change to whatever
+    // }
+  }
+
+  div#main div.sidebar nav.nav__list ul li .nav__sub-title {
+    // @include breakpoint($small) {
+    //   font-size: 20px; // change to whatever
+    // }
+
+    // @include breakpoint($medium) {
+    //   font-size: 24px; // change to whatever
+    // }
+
+    @include breakpoint($large) {
+      font-size: 18px; // change to whatever
+    }
+
+    // @include breakpoint($x-large) {
+    //   font-size: 28px; // change to whatever
+    // }
+  }
+
+  div#main div.sidebar div.author-sidebar {
+    // display: block;
+    display: none;
+
+    @include breakpoint($small) {
+      display: none;
+    }
+
+    @include breakpoint($medium) {
+      display: block;
+    }
+
+    @include breakpoint($large) {
+      display: block;
+    }
+
+    @include breakpoint($x-large) {
+      display: block;
+    }
+  }
+
+  div#main div.sidebar nav.nav__list ul, div#main div.sidebar nav.nav__list ul li {
+    // @include breakpoint($small) {
+    //   font-size: 20px; // change to whatever
+    // }
+
+    // @include breakpoint($medium) {
+    //   font-size: 24px; // change to whatever
+    // }
+
+    @include breakpoint($large) {
+      font-size: 15px; // change to whatever
+    }
+
+    // @include breakpoint($x-large) {
+    //   font-size: 28px; // change to whatever
+    // }
+  }
+
+  // div#main {
+  //   font-size: 20px; // change to whatever
+
+  //   @include breakpoint($small) {
+  //     font-size: 20px; // change to whatever
+  //   }
+
+  //   @include breakpoint($medium) {
+  //     font-size: 24px; // change to whatever
+  //   }
+
+  //   @include breakpoint($large) {
+  //     font-size: 26px; // change to whatever
+  //   }
+
+  //   @include breakpoint($x-large) {
+  //     font-size: 28px; // change to whatever
+  //   }
+  // }
+
+  // div#main nav.nav__list ul.nav__items {
+  //   font-size: 20px; // change to whatever
+
+  //   @include breakpoint($small) {
+  //     font-size: 20px; // change to whatever
+  //   }
+
+  //   @include breakpoint($medium) {
+  //     font-size: 24px; // change to whatever
+  //   }
+
+  //   @include breakpoint($large) {
+  //     font-size: 26px; // change to whatever
+  //   }
+
+  //   @include breakpoint($x-large) {
+  //     font-size: 28px; // change to whatever
+  //   }
+  // }
+
+  // div#main article.page section.page__content h1 {
+  //   font-size: 16px; // change to whatever
+
+  //   @include breakpoint($small) {
+  //     font-size: 18px; // change to whatever
+  //   }
+
+  //   @include breakpoint($medium) {
+  //     font-size: 22px; // change to whatever
+  //   }
+
+  //   @include breakpoint($large) {
+  //     font-size: 24px; // change to whatever
+  //   }
+
+  //   @include breakpoint($x-large) {
+  //     font-size: 30px; // change to whatever
+  //   }
+  // }
+
+  // div#main article.page section.page__content h2 {
+  //   font-size: 14px; // change to whatever
+
+  //   @include breakpoint($small) {
+  //     font-size: 16px; // change to whatever
+  //   }
+
+  //   @include breakpoint($medium) {
+  //     font-size: 18px; // change to whatever
+  //   }
+
+  //   @include breakpoint($large) {
+  //     font-size: 20px; // change to whatever
+  //   }
+
+  //   @include breakpoint($x-large) {
+  //     font-size: 24px; // change to whatever
+  //   }
+  // }
+
+  div#main article.page section.page__content {
+    // font-size: 10px; // change to whatever
+
+    // @include breakpoint($small) {
+    //   font-size: 12px; // change to whatever
+    // }
+
+    // @include breakpoint($medium) {
+    //   font-size: 14px; // change to whatever
+    // }
+
+    @include breakpoint($large) {
+      font-size: 17px; // change to whatever
+    }
+
+    // @include breakpoint($x-large) {
+    //   font-size: 18px; // change to whatever
+    // }
+  }
+
+  // div#main article.page section.page__content table {
+  //   font-size: 10px; // change to whatever
+
+  //   @include breakpoint($small) {
+  //     font-size: 10px; // change to whatever
+  //   }
+
+  //   @include breakpoint($medium) {
+  //     font-size: 12px; // change to whatever
+  //   }
+
+  //   @include breakpoint($large) {
+  //     font-size: 14px; // change to whatever
+  //   }
+
+  //   @include breakpoint($x-large) {
+  //     font-size: 16px; // change to whatever
+  //   }
+  // }
+}
