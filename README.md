@@ -6,7 +6,7 @@
 
 ## ⬇️ Install
 
-Download the [latest version](https://github.com/specs-sh/microspec/archive/v1.4.0.tar.gz) by clicking one of the download links above or:
+Download the [latest version](https://github.com/specs-sh/microspec/archive/v1.5.0.tar.gz) by clicking one of the download links above or:
 
 ```sh
 curl -o- https://micro.specs.sh/install.sh | bash
@@ -147,7 +147,7 @@ For those who are interested, here are the 30 lines of code for `microspec`:
 
 ```sh
 #! /usr/bin/env bash
-MICROSPEC_VERSION=1.4.0; [ "$1" = --version ] && { echo "microspec version $MICROSPEC_VERSION"; exit 0; }
+MICROSPEC_VERSION=1.5.0; [ "$1" = --version ] && { echo "microspec version $MICROSPEC_VERSION"; exit 0; }
 [ "$1" = --list ] && [ -f "$2" ] && { source "$2"; if declare -pF | awk '{print $3}' | grep -i '^test\|^spec' 2>/dev/null; then exit 0; else exit $?; fi; }
 runAll() { if [ -z "${1:-}" ]; then return 0; fi; if __spec__functions="$( declare -pF | awk '{print $3}' | grep -i "$1" 2>/dev/null )"; then for __spec__fn in $__spec__functions; do $__spec__fn; done; fi; }
 recordCmd() { spec_return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ] && [ "$4" = "$SPEC_TEST" ] && [ -z "$__spec__testDone" ]; then CMD_INFO=("${@:1}"); fi; return $spec_return; }
