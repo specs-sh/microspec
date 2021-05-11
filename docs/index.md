@@ -156,11 +156,11 @@ For those who are interested, here are the 30 lines of code for `microspec`:
 MICROSPEC_VERSION=1.4.0; [ "$1" = --version ] && { echo "microspec version $MICROSPEC_VERSION"; exit 0; }
 [ "$1" = --list ] && [ -f "$2" ] && { source "$2"; if declare -pF | awk '{print $3}' | grep -i '^test\|^spec' 2>/dev/null; then exit 0; else exit $?; fi; }
 runAll() { if [ -z "${1:-}" ]; then return 0; fi; if __spec__functions="$( declare -pF | awk '{print $3}' | grep -i "$1" 2>/dev/null )"; then for __spec__fn in $__spec__functions; do $__spec__fn; done; fi; }
-recordCmd() { spec_return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ]; then if [ -z "$__spec__testDone" ]; then CMD_INFO=("${@:1}"); fi; fi; return $spec_return; }
-[ "$1" = --run ] && [ -f "$2" ] && [ -n "$3" ] && { source "$2"; set -eET; trap : ERR
+recordCmd() { spec_return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ] && [ "$4" = "$SPEC_TEST" ] && [ -z "$__spec__testDone" ]; then CMD_INFO=("${@:1}"); fi; return $spec_return; }
+[ "$1" = --run ] && [ -f "$2" ] && [ -n "$3" ] && { SPEC_FILE="$2"; SPEC_TEST="$3"; shift 3; source "$SPEC_FILE"; set -eET; trap : ERR
   trap 'CMD_INFO[0]=$?; __spec__testDone=true; runAll "^teardown\|^after"; declare -p CMD_INFO' EXIT
   trap 'recordCmd $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}" "$BASH_COMMAND";' DEBUG; 
-  runAll "^setup\|^before"; "$3"; exit $?; }
+  runAll "^setup\|^before"; "$SPEC_TEST"; exit $?; }
 for SPEC_FILE; do echo -e "[\e[36m$SPEC_FILE\e[0m]"; declare -i PASSED=0; declare -i FAILED=0
   if [ -f "$SPEC_FILE" ]; then
     for SPEC_TEST in $("$0" --list "$SPEC_FILE" 2>/dev/null); do
