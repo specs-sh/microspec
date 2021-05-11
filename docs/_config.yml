@@ -9,8 +9,8 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
 github:
-  zip_url: https://github.com/specs-sh/microspec/archive/v1.6.0.zip
-  tar_url: https://github.com/specs-sh/microspec/archive/v1.6.0.tar.gz
+  zip_url: https://github.com/specs-sh/microspec/archive/v1.6.1.zip
+  tar_url: https://github.com/specs-sh/microspec/archive/v1.6.1.tar.gz
   owner_url: https://github.com/beccasaurus
   owner_name: "@beccasaurus"
 

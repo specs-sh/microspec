@@ -6,7 +6,7 @@
 
 ## ⬇️ Install
 
-Download the [latest version](https://github.com/specs-sh/microspec/archive/v1.6.0.tar.gz) by clicking one of the download links above or:
+Download the [latest version](https://github.com/specs-sh/microspec/archive/v1.6.1.tar.gz) by clicking one of the download links above or:
 
 ```sh
 curl -o- https://micro.specs.sh/install.sh | bash
@@ -147,17 +147,17 @@ For those who are interested, here are the 30 lines of code for `microspec`:
 
 ```sh
 #! /usr/bin/env bash
-MICROSPEC_VERSION=1.6.0; [ "$1" = --version ] && { echo "microspec version $MICROSPEC_VERSION"; exit 0; }
+MICROSPEC_VERSION=1.6.1; [ "$1" = --version ] && { echo "microspec version $MICROSPEC_VERSION"; exit 0; }
 [ "$1" = --list ] && [ -f "$2" ] && { source "$2"; if declare -pF | awk '{print $3}' | grep -i '^test\|^spec' 2>/dev/null; then exit 0; else exit $?; fi; }
 runAll() { if [ -z "${1:-}" ]; then return 0; fi; if __spec__functions="$( declare -pF | awk '{print $3}' | grep -i "$1" 2>/dev/null )"; then for __spec__fn in $__spec__functions; do $__spec__fn; done; fi; }
 recordCmd() { spec_return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ] && { [ -z "$__spec__sourcedOk" ] || [ "$4" = "$SPEC_TEST" ]; } && [ -z "$__spec__testDone" ]; then CMD_INFO=("${@:1}"); fi; if [ "$4" = "${CMD_INFO[3]}" ]; then return $spec_return; else return 0; fi; }
-[ "$1" = --run ] && [ -f "$2" ] && [ -n "$3" ] && { SPEC_FILE="$2"; SPEC_TEST="$3"; shift 3; set -eET; trap 'spec_return=$?; [ -z "$__spec__sourcedOk" ] && declare -p CMD_INFO; exit $spec_return' ERR
+[ "$1" = --run ] && [ -f "$2" ] && [ -n "$3" ] && { SPEC_FILE="$2"; SPEC_TEST="$3"; shift 3; set -eET; trap 'spec_return=$?; [ -z "$__spec__sourcedOk" ] && { declare -p CMD_INFO; exit $spec_return; } || return 0' ERR
   trap 'CMD_INFO[0]=$?; __spec__testDone=true; [ "$SPEC_SOURCE" = true ] && runAll "^teardown\|^after"; declare -p CMD_INFO' EXIT
   trap 'recordCmd $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}" "$BASH_COMMAND";' DEBUG; 
   source "$SPEC_FILE"; __spec__sourcedOk=true; runAll "^setup\|^before"; "$SPEC_TEST"; exit $?; }; SPEC_FILES=()
 while (( $# > 0 )); do [ "$1" = -f ] || [ "$1" = --filter ] && { SPEC_FILTER="$2"; shift 2; continue; } || { SPEC_FILES+=("$1"); shift; }; done
 declare -i PASSED=0; declare -i FAILED=0;
-for SPEC_FILE in "${SPEC_FILES[@]}"; do
+for SPEC_FILE in "${SPEC_FILES[@]}"; do echo -e "[\e[36m$SPEC_FILE\e[0m]"
   if [ -f "$SPEC_FILE" ]; then
     for SPEC_TEST in $( "$0" --list "$SPEC_FILE" 2>/dev/null | grep -i "${SPEC_FILTER:-.}" ); do
       SPEC_TEST_OUTPUT="$({ STDERR="$({ STDOUT="$( "$0" --run "$SPEC_FILE" "$SPEC_TEST" )"; } 2>&1; declare -i EXITCODE=$?; declare -p STDOUT >&2; declare -p EXITCODE >&2; exit $EXITCODE;)"; declare -p STDERR; exit 0; } 2>&1 )"
