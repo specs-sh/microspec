@@ -5,12 +5,11 @@ runAll() { if [ -z "${1:-}" ]; then return 0; fi; if __spec__functions="$( decla
 recordCmd() { spec_return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ] && [ "$4" = "$SPEC_TEST" ] && [ -z "$__spec__testDone" ]; then CMD_INFO=("${@:1}"); fi; if [ "$5" = "${CMD_INFO[4]}" ]; then return $spec_return; else return 0; fi; }
 [ "$1" = --run ] && [ -f "$2" ] && [ -n "$3" ] && { SPEC_FILE="$2"; SPEC_TEST="$3"; shift 3; source "$SPEC_FILE"; set -eET; trap : ERR
   trap 'CMD_INFO[0]=$?; __spec__testDone=true; runAll "^teardown\|^after"; declare -p CMD_INFO' EXIT
-  trap 'recordCmd $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}" "$BASH_COMMAND";' DEBUG; 
-  runAll "^setup\|^before"; "$SPEC_TEST"; exit $?; }; SPEC_FILES=()
-while (( $# > 0 )); do [ "$1" = -f ] || [ "$1" = --filter ] && { SPEC_FILTER="$2"; shift 2; continue; } || { SPEC_FILES+=("$1"); shift; }; done
+  trap 'recordCmd $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}" "$BASH_COMMAND";' DEBUG;  runAll "^setup\|^before"; "$SPEC_TEST"; exit $?; }; SPEC_FILES=()
+while (( $# > 0 )); do [ "$1" = -f ] || [ "$1" = --filter ] && { SPEC_FILTER="$2"; shift 2; continue; } || { [ -f "$1" ] && SPEC_FILES+=("$1"); shift; }; done
 declare -i TEST_COUNT=0; for SPEC_FILE in "${SPEC_FILES[@]}"; do __spec__testCount="$("$0" --list "$SPEC_FILE" 2>/dev/null | grep -i "${SPEC_FILTER:-.}" | wc -l)"; (( TEST_COUNT += __spec__testCount )); done
-(( TEST_COUNT > 0 )) && echo "1..$TEST_COUNT" || exit 0
-for SPEC_FILE in "${SPEC_FILES[@]}"; do declare -i PASSED=0; declare -i FAILED=0; declare -i TEST_NUMBER=0
+declare -i PASSED=0; declare -i FAILED=0; declare -i TEST_NUMBER=0; (( TEST_COUNT > 0 )) && echo "1..$TEST_COUNT" || exit 0
+for SPEC_FILE in "${SPEC_FILES[@]}"; do
   if [ -f "$SPEC_FILE" ]; then
     for SPEC_TEST in $("$0" --list "$SPEC_FILE" 2>/dev/null | grep -i "${SPEC_FILTER:-.}" ); do (( TEST_NUMBER++ ))
       SPEC_TEST_OUTPUT="$({ STDERR="$({ STDOUT="$( "$0" --run "$SPEC_FILE" "$SPEC_TEST" )"; } 2>&1; declare -i EXITCODE=$?; declare -p STDOUT >&2; declare -p EXITCODE >&2; exit $EXITCODE;)"; declare -p STDERR; exit 0; } 2>&1 )"

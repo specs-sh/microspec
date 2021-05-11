@@ -162,7 +162,8 @@ recordCmd() { spec_return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ] && [ "$4" = "
   trap 'recordCmd $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]}" "$BASH_COMMAND";' DEBUG; 
   runAll "^setup\|^before"; "$SPEC_TEST"; exit $?; }; SPEC_FILES=()
 while (( $# > 0 )); do [ "$1" = -f ] || [ "$1" = --filter ] && { SPEC_FILTER="$2"; shift 2; continue; } || { SPEC_FILES+=("$1"); shift; }; done
-for SPEC_FILE in "${SPEC_FILES[@]}"; do echo -e "[\e[36m$SPEC_FILE\e[0m]"; declare -i PASSED=0; declare -i FAILED=0
+declare -i PASSED=0; declare -i FAILED=0;
+for SPEC_FILE in "${SPEC_FILES[@]}"; do
   if [ -f "$SPEC_FILE" ]; then
     for SPEC_TEST in $( "$0" --list "$SPEC_FILE" 2>/dev/null | grep -i "${SPEC_FILTER:-.}" ); do
       SPEC_TEST_OUTPUT="$({ STDERR="$({ STDOUT="$( "$0" --run "$SPEC_FILE" "$SPEC_TEST" )"; } 2>&1; declare -i EXITCODE=$?; declare -p STDOUT >&2; declare -p EXITCODE >&2; exit $EXITCODE;)"; declare -p STDERR; exit 0; } 2>&1 )"
@@ -179,9 +180,8 @@ for SPEC_FILE in "${SPEC_FILES[@]}"; do echo -e "[\e[36m$SPEC_FILE\e[0m]"; decla
         }
       }
     done
-  fi; (( FAILED > 0 )) && echo -e "\e[31;1m" || echo -e "\e[32m"; echo -e "$PASSED Passed, $FAILED Failed"; printf '\e[0m%s' ''
-(( FAILED > 0 )) && exit 1 || exit 0
-done
+  fi
+done; (( FAILED > 0 )) && echo -e "\e[31;1m" || echo -e "\e[32m"; echo -e "$PASSED Passed, $FAILED Failed"; printf '\e[0m%s' ''; (( FAILED > 0 )) && exit 1 || exit 0
 ```
 
 Some interesting things to note for Bash geeks:
