@@ -96,7 +96,7 @@ testHelloWorld() {
 }
 ```
 
-> ℹ️ **Note:** _To learn more, look into the `set -e` (which is used in `microspec` to fail tests)_
+> ℹ️ **Note:** _To learn more, look into `set -e` (which is used in `microspec` to fail tests)_
 
 ## Setup and Teardown
 
