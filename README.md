@@ -1,6 +1,6 @@
 # `$ microspec`
 
-> _The smallest, TAP-compliant, Mac-compatible, Bash test framework! (30 LOC) (3.1KB)_
+> _The smallest, TAP-compliant, Mac-compatible, Bash test framework! (30 LOC) (3KB)_
 
 ---
 
