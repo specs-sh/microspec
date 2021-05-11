@@ -43,7 +43,7 @@ test.shouldFail() {
 ./microtap example.spec.sh
 
 1..2
-not ok - test.shouldFail
+not ok 1 - test.shouldFail
 # Standard Output:
 #  Hello from setup.
 #  STDOUT from shouldFail
@@ -53,7 +53,7 @@ not ok - test.shouldFail
 # Stacktrace:
 #   example.spec.sh:13 test.shouldFail
 #    (( 1 == 0 )) # <-- this fails so the test fails
-ok - test.shouldPass
+ok 2 - test.shouldPass
 ```
 
 ## 📖 Documentation
