@@ -12,7 +12,7 @@ title: ""
 
 ## <i class="fad fa-download"></i> Install
 
-Download the [latest version](https://github.com/specs-sh/microspec/archive/v1.8.0.tar.gz) by clicking one of the download links above or:
+Download the [latest version](https://github.com/specs-sh/microspec/archive/v1.8.1.tar.gz) by clicking one of the download links above or:
 
 ```sh
 curl -o- https://micro.specs.sh/install.sh | bash
@@ -153,11 +153,11 @@ For those who are interested, here are the 30 lines of code for `microspec`:
 
 ```sh
 #! /usr/bin/env bash
-MICROSPEC_VERSION=1.8.0; [ "$1" = --version ] && { echo "microspec version $MICROSPEC_VERSION"; exit 0; }
+MICROSPEC_VERSION=1.8.1; [ "$1" = --version ] && { echo "microspec version $MICROSPEC_VERSION"; exit 0; }
 [ "$1" = --list ] && [ -f "$2" ] && { source "$2"; if declare -pF | awk '{print $3}' | grep -i '^test\|^spec' 2>/dev/null; then exit 0; else exit $?; fi; }
 runAll() { if [ -z "${1:-}" ]; then return 0; fi; if __spec__functions="$( declare -pF | awk '{print $3}' | grep -i "$1" 2>/dev/null )"; then for __spec__fn in $__spec__functions; do $__spec__fn; done; fi; }
 recordCmd() { spec_return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ] && { [ -z "${__spec__sourcedOk:-}" ] || [ "$4" = "$SPEC_TEST" ]; } && [ -z "${__spec__testDone:-}" ]; then CMD_INFO=("${@:1}"); fi; if [ "$4" = "${CMD_INFO[3]:-}" ]; then return $spec_return; else return 0; fi; }
-[ "$1" = --run ] && [ -f "$2" ] && [ -n "$3" ] && { SPEC_FILE="$2"; SPEC_TEST="$3"; shift 3; set -eET; trap 'spec_return=$?; [ -z "$__spec__sourcedOk" ] && { declare -p CMD_INFO; exit $spec_return; } || { exit $spec_return; }' ERR
+[ "$1" = --run ] && [ -f "$2" ] && [ -n "$3" ] && { SPEC_FILE="$2"; SPEC_TEST="$3"; shift 3; set -eET; trap 'spec_return=$?; [ -z "${__spec__sourcedOk:-}" ] && declare -p CMD_INFO; exit $spec_return;' ERR
   trap 'CMD_INFO[0]=$?; __spec__testDone=true; [ "${__spec__sourcedOk:-}" = true ] && runAll "^teardown\|^after"; declare -p CMD_INFO' EXIT
   trap 'recordCmd $? "${BASH_SOURCE[0]}" "$LINENO" "${FUNCNAME[0]:-}" "$BASH_COMMAND";' DEBUG; 
   source "$SPEC_FILE"; __spec__sourcedOk=true; runAll "^setup\|^before"; "$SPEC_TEST"; exit $?; }; SPEC_FILES=()
@@ -193,7 +193,7 @@ Some interesting things to note for Bash geeks:
   - Then the parent process `eval`'s the provided _safely_ serialized string
 - `DEBUG` trap is used to get the command that failed (_`ERR` sees the command **after** the failing one_)
   - Every command is watched so, when `ERR` and `EXIT` are triggered, we have the command that failed 
-- `ERR` trap is registered but does nothing. Simply being registered lets `ERR` exit and trigger `EXIT`
+- `ERR` trap is used when `source`d file triggers an error (_before running test_) to communicate back to the parent (_the responsibility of `EXIT` in other circumstances_) (_does not run teardown_)
 - `EXIT` trap is used to run teardown functions and uses `declare -p` to communicate back to the parent
 - `microspec`, itself, does not run with `set -e` or `set -u` (_it would add extra needless code_)
 - _It was really fun to make!_
