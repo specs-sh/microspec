@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 # Copyright (c) 2021 Rebecca Taylor - MIT License
-MICROSPEC_VERSION=1.8.1; [ "$1" = --version ] && { echo "microspec version $MICROSPEC_VERSION"; exit 0; }
+MICROSPEC_VERSION=1.9.0; [ "$1" = --version ] && { echo "microspec version $MICROSPEC_VERSION"; exit 0; }
 [ "$1" = --list ] && [ -f "$2" ] && { source "$2"; if declare -pF | awk '{print $3}' | grep -i '^test\|^spec' 2>/dev/null; then exit 0; else exit $?; fi; }
 runAll() { if [ -z "${1:-}" ]; then return 0; fi; if __spec__functions="$( declare -pF | awk '{print $3}' | grep -i "$1" 2>/dev/null )"; then for __spec__fn in $__spec__functions; do $__spec__fn; done; fi; }
 recordCmd() { spec_return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ] && { [ -z "${__spec__sourcedOk:-}" ] || [ "$4" = "$SPEC_TEST" ]; } && [ -z "${__spec__testDone:-}" ]; then CMD_INFO=("${@:1}"); fi; if [ "$4" = "${CMD_INFO[3]:-}" ]; then return $spec_return; else return 0; fi; }
@@ -22,10 +22,9 @@ for SPEC_FILE in "${SPEC_FILES[@]}"; do echo -e "[\033[36m$SPEC_FILE\033[0m]"
         [ -n "$STDOUT" ] && { echo -e "    [\033[34mStandard Output\033[0m]"; echo -e "\033[39;2m$( echo -e "$STDOUT" | sed 's/^/      /' )\033[0m"; }
         [ -n "$STDERR" ] && { echo -e "    [\033[31mStandard Error\033[0m]"; echo -e "\033[39;2m$( echo -e "$STDERR" | sed 's/^/      /' )\033[0m"; }
         (( ${#CMD_INFO[@]} > 2 )) && { (( EXITCODE != 0 )) || [ "$STACKTRACE" = true ]; } && {
-          echo -e "    [\033[33mStacktrace\033[0m]"; echo -e "      \033[34m${CMD_INFO[1]}\033[0m:\033[34m${CMD_INFO[2]} ${CMD_INFO[3]}";
-          [ -f "${CMD_INFO[1]}" ] && echo -e "\033[33;2m$( sed "${CMD_INFO[2]}q;d" "${CMD_INFO[1]}" | sed "s/^ *//g" | sed "s/^/        /" )\033[0m";
-        }
-      }
+          echo -e "    [\033[33mStacktrace\033[0m]"; [ -f "${CMD_INFO[1]}" ] && [ "${CMD_INFO[2]}" -le "$( wc -l < "${CMD_INFO[1]}" 2>&1 )" ] && {
+            echo -e "      \033[34m${CMD_INFO[1]}\033[0m:\033[34m${CMD_INFO[2]} ${CMD_INFO[3]}"; echo -e "\033[33;2m$( sed "${CMD_INFO[2]}q;d" "${CMD_INFO[1]}" | sed "s/^ *//g" | sed "s/^/        /" )\033[0m"; } || {
+            echo -e "      \033[34m${CMD_INFO[3]}"; echo -e "\033[33;2m        ${CMD_INFO[4]}\033[0m"; }; }; }
     done
   fi
 done; (( FAILED > 0 )) && echo -e "\033[31;1m" || echo -e "\033[32m"; echo -e "$PASSED Passed, $FAILED Failed"; printf '\033[0m%s' ''; (( FAILED > 0 )) && exit 1 || exit 0
