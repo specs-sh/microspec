@@ -12,7 +12,7 @@ title: ""
 
 ## <i class="fad fa-download"></i> Install
 
-Download the [latest version](https://github.com/specs-sh/microspec/archive/v1.9.1.tar.gz) by clicking one of the download links above or:
+Download the [latest version](https://github.com/specs-sh/microspec/archive/v1.9.2.tar.gz) by clicking one of the download links above or:
 
 ```sh
 curl -o- https://micro.specs.sh/install.sh | bash
@@ -153,7 +153,7 @@ For those who are interested, here are the 30 lines of code for `microspec`:
 
 ```sh
 #! /usr/bin/env bash
-MICROSPEC_VERSION=1.9.1; [ "$1" = --version ] && { echo "microspec version $MICROSPEC_VERSION"; exit 0; }
+MICROSPEC_VERSION=1.9.2; [ "$1" = --version ] && { echo "microspec version $MICROSPEC_VERSION"; exit 0; }
 [ "$1" = --list ] && [ -f "$2" ] && { source "$2"; if declare -pF | awk '{print $3}' | grep -i '^test\|^spec' 2>/dev/null; then exit 0; else exit $?; fi; }
 runAll() { if [ -z "${1:-}" ]; then return 0; fi; if __spec__functions="$( declare -pF | awk '{print $3}' | grep -i "$1" 2>/dev/null )"; then for __spec__fn in $__spec__functions; do $__spec__fn; done; fi; }
 recordCmd() { spec_return=$?; if (( $1 == 0 )) && [ "$2" != "$0" ] && { [ -z "${__spec__sourcedOk:-}" ] || [ "$4" = "$SPEC_TEST" ]; } && [ -z "${__spec__testDone:-}" ]; then CMD_INFO=("${@:1}"); fi; if [ "$4" = "${CMD_INFO[3]:-}" ]; then return $spec_return; else return 0; fi; }
@@ -165,7 +165,7 @@ while (( $# > 0 )); do [ "$1" = -f ] || [ "$1" = --filter ] && { SPEC_FILTER="$2
 declare -i PASSED=0; declare -i FAILED=0;
 for SPEC_FILE in "${SPEC_FILES[@]}"; do echo -e "[\033[36m$SPEC_FILE\033[0m]"
   if [ -f "$SPEC_FILE" ]; then
-    SPEC_TESTS="$( "$0" --list "$SPEC_FILE" 2>&1 )"; (( $? != 0 )) && { echo -e "  [\033[31mLoad Error\033[0m]\n\033[31;2m$( echo "$SPEC_TESTS" | sed 's/^/    /' )\033[0m"; } || { for SPEC_TEST in $(echo $SPEC_TESTS | grep -i "${SPEC_FILTER:-.}"); do
+    SPEC_TESTS="$( "$0" --list "$SPEC_FILE" 2>&1 )"; (( $? != 0 )) && { echo -e "  [\033[31mLoad Error\033[0m]\n\033[31;2m$( echo "$SPEC_TESTS" | sed 's/^/    /' )\033[0m"; } || { for SPEC_TEST in $(echo "$SPEC_TESTS" | grep -i "${SPEC_FILTER:-.}"); do
       SPEC_TEST_OUTPUT="$({ STDERR="$({ STDOUT="$( "$0" --run "$SPEC_FILE" "$SPEC_TEST" )"; } 2>&1; declare -i EXITCODE=$?; declare -p STDOUT >&2; declare -p EXITCODE >&2; exit $EXITCODE;)"; declare -p STDERR; exit 0; } 2>&1 )"
       eval "$SPEC_TEST_OUTPUT";
       [[ "$STDOUT" =~ .*(declare[[:space:]]-a[[:space:]]CMD_INFO=[\']?\(.*)$ ]] && __spec_lastCmdText__="${BASH_REMATCH[1]}"
