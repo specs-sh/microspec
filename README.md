@@ -106,7 +106,7 @@ testList() {
 }
 ```
 
-Any function starting with _"teardown"_ or _"before"_ is run **_after each test_**:
+Any function starting with _"teardown"_ or _"after"_ is run **_after each test_**:
 
 ```sh
 before() { # <--- could alternatively be named 'setup' or 'setupTempDir' etc
